@@ -178,8 +178,117 @@ const seedData = () => {
                     { name: 'Olive Oil', quantity: 15, unit: 'ml' },
                     { name: 'Lemon', quantity: 0.5, unit: 'piece' }
                 ]
+            },
+            {
+                title: 'Veggie Omelette',
+                instructions: 'Whisk eggs. Sauté spinach and mushrooms. Pour eggs and top with cheese.',
+                servings: 1,
+                tags: ['Breakfast', 'Vegetarian', 'High-Protein'],
+                ingredients: [
+                    { name: 'Egg', quantity: 3, unit: 'piece' },
+                    { name: 'Spinach', quantity: 50, unit: 'g' },
+                    { name: 'Mushrooms', quantity: 50, unit: 'g' },
+                    { name: 'Cheese', quantity: 30, unit: 'g' },
+                    { name: 'Butter', quantity: 10, unit: 'g' }
+                ]
+            },
+            {
+                title: 'Beef & Broccoli',
+                instructions: 'Thinly slice beef. Sauté with broccoli, soy sauce, and garlic.',
+                servings: 2,
+                tags: ['Dinner', 'High-Protein', 'Low-Carb'],
+                ingredients: [
+                    { name: 'Beef Steak', quantity: 300, unit: 'g' },
+                    { name: 'Broccoli', quantity: 200, unit: 'g' },
+                    { name: 'Soy Sauce', quantity: 20, unit: 'ml' },
+                    { name: 'Garlic', quantity: 2, unit: 'clove' },
+                    { name: 'Sesame Oil', quantity: 5, unit: 'ml' }
+                ]
+            },
+            {
+                title: 'Shrimp Scampi',
+                instructions: 'Sauté shrimp in butter and garlic. Toss with pasta and lemon juice.',
+                servings: 2,
+                tags: ['Dinner', 'Italian'],
+                ingredients: [
+                    { name: 'Shrimp', quantity: 10, unit: 'piece' },
+                    { name: 'Pasta', quantity: 150, unit: 'g' },
+                    { name: 'Butter', quantity: 30, unit: 'g' },
+                    { name: 'Garlic', quantity: 3, unit: 'clove' },
+                    { name: 'Lemon', quantity: 1, unit: 'piece' }
+                ]
+            },
+            {
+                title: 'Quinoa Bowl',
+                instructions: 'Cook quinoa. Top with black beans, corn, avocado, and cilantro.',
+                servings: 2,
+                tags: ['Lunch', 'Vegan', 'Gluten-Free'],
+                ingredients: [
+                    { name: 'Quinoa', quantity: 150, unit: 'g' },
+                    { name: 'Beans', quantity: 100, unit: 'g' },
+                    { name: 'Corn', quantity: 50, unit: 'g' },
+                    { name: 'Avocado', quantity: 1, unit: 'piece' },
+                    { name: 'Cilantro', quantity: 10, unit: 'g' }
+                ]
+            },
+            {
+                title: 'Salmon with Asparagus',
+                instructions: 'Bake salmon and asparagus with lemon and olive oil at 200°C for 15 mins.',
+                servings: 2,
+                tags: ['Dinner', 'Healthy', 'Gluten-Free'],
+                ingredients: [
+                    { name: 'Salmon', quantity: 300, unit: 'g' },
+                    { name: 'Olive Oil', quantity: 20, unit: 'ml' },
+                    { name: 'Lemon', quantity: 1, unit: 'piece' },
+                    { name: 'Salt', quantity: 2, unit: 'g' }
+                ]
+            },
+            {
+                title: 'Classic Burger',
+                instructions: 'Grill beef patty. Serve in bun with lettuce, tomato, and cheese.',
+                servings: 1,
+                tags: ['Dinner'],
+                ingredients: [
+                    { name: 'Ground Beef', quantity: 200, unit: 'g' },
+                    { name: 'Bread', quantity: 1, unit: 'piece' },
+                    { name: 'Cheese', quantity: 1, unit: 'slice' },
+                    { name: 'Tomato', quantity: 1, unit: 'slice' },
+                    { name: 'Lettuce', quantity: 2, unit: 'leaf' }
+                ]
+            },
+            {
+                title: 'Berry Smoothie',
+                instructions: 'Blend yogurt, milk, and honey with frozen berries.',
+                servings: 1,
+                tags: ['Breakfast', 'Healthy'],
+                ingredients: [
+                    { name: 'Yogurt', quantity: 200, unit: 'g' },
+                    { name: 'Milk', quantity: 100, unit: 'ml' },
+                    { name: 'Honey', quantity: 15, unit: 'g' }
+                ]
+            },
+            {
+                title: 'Potato Salad',
+                instructions: 'Boil potatoes. Mix with onions, mayonnaise, and herbs.',
+                servings: 4,
+                tags: ['Lunch', 'Vegetarian'],
+                ingredients: [
+                    { name: 'Potato', quantity: 800, unit: 'g' },
+                    { name: 'Onion', quantity: 1, unit: 'piece' }
+                ]
+            },
+            {
+                title: 'Tofu Curry',
+                instructions: 'Sauté tofu with onions and garlic. Add coconut milk and curry powder.',
+                servings: 2,
+                tags: ['Dinner', 'Vegan', 'Gluten-Free'],
+                ingredients: [
+                    { name: 'Tofu', quantity: 400, unit: 'g' },
+                    { name: 'Coconut Milk', quantity: 400, unit: 'ml' },
+                    { name: 'Curry Powder', quantity: 15, unit: 'g' },
+                    { name: 'Onion', quantity: 1, unit: 'piece' }
+                ]
             }
-            // Add more recipes to reach ~15... (compacted for brevity)
         ];
 
         // Add missing ingredients from recipes
