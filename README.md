@@ -56,7 +56,7 @@ Refer to [backend/README-backend.md](backend/README-backend.md) for detailed bac
 
 - **Core**: React 18 & Vite 5
 - **Styling**: Vanilla CSS (Custom Variable System)
-- **State & Storage**: Browser-native LocalStorage
+- **Persistence**: SQLite (source of truth via backend API) + optional LocalStorage cache for UI convenience.
 - **Testing**: Vitest & JSDOM
 - **Hosting**: Cloudflare Pages (Unlimited Build Time)
 - **Containerization**: Docker & NGINX

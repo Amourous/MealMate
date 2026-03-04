@@ -12,7 +12,7 @@ MealMate aims to simplify the complex task of weekly meal planning and grocery m
 - **Responsive Design**: Optimization for desktop and mobile performance.
 
 ### Out-of-Scope (Future Enhancements)
-- User Authentication (LocalStorage-based for simplicity).
+- User Authentication (Backend-integrated persistence).
 - Shared shopping lists (Social features).
 - Direct API integration with grocery retailers for price updates.
 
@@ -25,7 +25,7 @@ MealMate aims to simplify the complex task of weekly meal planning and grocery m
 ## 4. Risks and Mitigation
 | Risk | Impact | Mitigation |
 | :--- | :--- | :--- |
-| Data Loss (LocalStorage) | High | Implement clear warnings and future sync capabilities. |
+| Server Connectivity Loss | High | Implement offline caching (LocalStorage) and synchronization recovery. |
 | Performance with large libraries | Medium | Utilize Vite and React's virtual DOM for efficient rendering. |
 | Inaccurate Ingredient Scaling | High | Use unit conversion libraries and rigorous testing. |
 
