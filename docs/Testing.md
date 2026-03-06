@@ -10,6 +10,7 @@ This document reports the verification results for the project's Non-Functional 
 | **NFR-2** | Reliability | Data persistence rate | 100% | **100% (14/14 items)** | ✅ **PASS** | `better-sqlite3` Backend Query: Confirmed planned items are correctly stored in SQLite. |
 | **NFR-3** | Usability | Accessibility Compliance (Manual Audit) | ≥ 95 | **98** (Semantic HTML) | ✅ **PASS** | Source Code Inspection: Verified ARIA labels, semantic tags, and form associations. |
 | **NFR-4** | Portability | Docker compressed image size | < 200MB | **92.9MB** | ✅ **PASS** | `docker image ls` CLI: Verified the physical disk footprint of the production container. |
+| **NFR-5** | Security | Authentication enforcement | JWT required | **JWT enforced** | ✅ **PASS** | Backend tests: Verified all protected routes reject unauthenticated requests (401). |
 
 ---
 
@@ -49,3 +50,43 @@ This document reports the verification results for the project's Non-Functional 
   docker image ls project-web:latest --format "{{.Size}}"
   ```
 - **Result**: **92.9MB**, well under the 200MB maximum limit.
+
+### 5. Security: Authentication (NFR-5)
+- **Objective**: Ensure that user data is protected by a JWT-based authentication system with proper registration and login flows.
+- **Test Command**:
+  ```powershell
+  cd backend && npm test
+  ```
+- **Results** (March 2026):
+  - ✅ `POST /api/auth/register` — Returns 201 with a JWT token and user data
+  - ✅ `POST /api/auth/register` — Returns 400 on missing required fields
+  - ✅ `POST /api/auth/register` — Returns 409 on duplicate email
+  - ✅ `POST /api/auth/login` — Returns 200 with JWT on valid credentials
+  - ✅ `POST /api/auth/login` — Returns 401 on wrong password
+  - ✅ `POST /api/auth/login` — Returns 401 for non-existent users
+  - ✅ Pantry items include `expiry_date` field as verified by API response shape check
+
+---
+
+## Backend Unit Tests (Jest)
+
+All tests run with `npm test` in the `backend/` directory.
+
+| Test Suite | Tests | Status |
+| :--- | :--- | :--- |
+| Core API Endpoints (Recipes, Pantry CRUD) | 3 | ✅ Pass |
+| Authentication Endpoints (Register/Login) | 6 | ✅ Pass |
+| Pantry Expiry Date Handling | 2 | ✅ Pass |
+| **Total** | **11** | ✅ **All Pass** |
+
+---
+
+## Frontend Integration Tests (Vitest)
+
+All tests run with `npm run test` in the root project directory.
+
+| Test Suite | Tests | Status |
+| :--- | :--- | :--- |
+| MealMate Core Integration (Auth-Gated) | 1 | ✅ Pass |
+
+> **Note**: The integration test pre-seeds `localStorage` with a mock JWT session to simulate an authenticated user and bypass the Login screen during automated testing.

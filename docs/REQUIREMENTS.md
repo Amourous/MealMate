@@ -16,9 +16,9 @@
 
 | NFR-ID | Quality Attribute | Requirement (measurable) | Target Value | How to Verify | Priority |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **NFR-1** | Performance | Ensure minimal initial load and interaction latency on typical user hardware (e.g., Desktop Chrome on 4G connection). | FCP < 0.8s | Lighthouse Performance Audit via Chrome DevTools in Incognito mode. | Must |
-| **NFR-2** | Reliability | User data (pantry, plan, settings) must persist across sessions and reloads via the backend SQLite database. | 100% Persistence | **Manual Procedure**: 1. Add item to plan. 2. Reload page via 'Ctrl+R'. 3. Confirm item is still present. | Must |
-| **NFR-3** | Usability | The interface shall maintain standard responsiveness and WCAG accessibility compliance. | Accessibility ≥ 95 | Lighthouse Accessibility Audit (Production build profile). | Must |
+| **NFR-1** | Performance | Ensure API endpoints respond within acceptable limits under simulated load. | API Latency < 200ms | Postman API Performance Testing & Collection Runner. | Must |
+| **NFR-2** | Reliability | Data manipulation (pantry, plan, settings) must accurately persist and return correctly validated responses. | 100% Pass Rate | Postman Automated Collection tests for CRUD workflows across backend SQLite database. | Must |
+| **NFR-3** | Usability | The API responses shall be standardized, well-structured, and use standard HTTP error codes. | 100% JSON standard | Postman API JSON Schema Validation. | Must |
 | **NFR-4** | Portability | System must support rapid deployment and local evaluation via Docker containers on any OS with Docker support. | Image size < 200MB | Run `docker images mealmate-frontend` to verify compressed size. | Should |
 
 ## 3. System Rules & Logic

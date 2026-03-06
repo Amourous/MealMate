@@ -16,12 +16,12 @@ The following matrix maps the Functional Requirements (FR) to the implementing m
 
 | NFR ID | Attribute | Implementing Mechanism / Component | Verification Method |
 | :--- | :--- | :--- | :--- |
-| **NFR-1** | Performance | Vite build optimization, Code splitting | Lighthouse Performance Audit, Chrome DevTools |
-| **NFR-2** | Reliability | Backend API, SQLite, `localStorage` (cache) | Manual session persistence testing |
-| **NFR-3** | Usability | CSS Media Queries, Semantic HTML | Lighthouse Accessibility Audit (Score ≥ 95) |
+| **NFR-1** | Performance | Backend API Optimization | Postman API Performance Audit (< 200ms latency) |
+| **NFR-2** | Reliability | Backend API, SQLite database | Postman Automated Collection Tests |
+| **NFR-3** | Usability | Standardized JSON Responses | Postman JSON Schema Validations |
 | **NFR-4** | Portability | `Dockerfile` (Alpine-based), Docker Compose | `docker build` and `docker run` validation |
 
 ## 3. Verification Summary
 - **Automated Tests**: Handled by Vitest, focusing on pure functions (scaling, deduction logic).
-- **Audit Tools**: Google Lighthouse for Performance (NFR-1), Accessibility (NFR-3).
-- **Manual QA**: Verifying the UI flow (e.g., adding to plan and checking if the grocery list reflects the new items correctly) and session persistence (NFR-2).
+- **Audit Tools**: Postman Automated Collection Runner for Performance (NFR-1) and Reliability/Validations (NFR-2, NFR-3).
+- **Manual QA**: Verifying the UI flow (e.g., adding to plan and checking if the grocery list reflects the new items correctly) and session persistence.
