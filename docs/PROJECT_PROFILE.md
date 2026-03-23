@@ -37,6 +37,10 @@ Software projects face a range of risks across schedule, technical, integration,
 | **R-06** | Testing gaps — test coverage insufficient to demonstrate requirement verification | Quality | M | 3 | 6 | Three-layer test strategy applied (unit, integration, manual); Test Case Catalogue created to make each test case traceable |
 | **R-07** | Dependency issues — third-party npm package deprecation or breaking change | Technical | L | 2 | 2 | `package-lock.json` committed to lock exact dependency versions; `better-sqlite3` chosen for stability |
 | **R-08** | Traceability gaps — requirements not linked to tests, making verification unclear | Documentation | M | 2 | 4 | Traceability Matrix expanded with Design Reference, Implementation Reference, and TC-prefixed Test Case IDs |
+| **R-09** | Server connectivity loss — backend API becomes unreachable during active session | Technical | M | 3 | 6 | Implemented offline caching via LocalStorage; UI degrades gracefully with error messages rather than crashing |
+| **R-10** | Performance degradation — slow render times with a large recipe library | Performance | M | 2 | 4 | Utilised Vite's optimised build pipeline and React's virtual DOM diffing; recipe data lazy-loaded on demand |
+| **R-11** | Inaccurate ingredient scaling — incorrect quantity calculations when adjusting servings | Functional | M | 3 | 6 | Implemented unit conversion library (`unitConversions.js`); scaling logic covered by dedicated Vitest unit tests |
+| **R-12** | Authentication bypass — protected API routes accessed without a valid JWT | Security | L | 3 | 3 | All protected Express routes wrapped with `authenticateToken` middleware; backend tests verify 401 is returned for unauthenticated requests |
 
 ## 5. Project Plan
 
