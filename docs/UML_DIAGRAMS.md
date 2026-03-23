@@ -6,218 +6,128 @@ Visual representation of the MealMate system using standard UML notation, render
 
 ## 1. Use Case Diagram
 
-Illustrates core interactions between the **User** and the MealMate system.
+Illustrates the core interactions between the **User** and the MealMate system, including Authentication, Meal Planning, and Pantry management flows.
 
 ```mermaid
-flowchart LR
-    %% ── Actors ─────────────────────────────────────────────
-    Guest([👤 Guest User])
-    Auth([👤 Authenticated User])
+graph LR
+    User(["👤 User"])
 
-    %% ── System Boundary ─────────────────────────────────────
-    subgraph MealMate ["  🍽️  MealMate System  "]
+    subgraph MealMate["🍽️ MealMate System"]
         direction TB
-
-        subgraph Public ["── Public Access ──"]
-            UC_Reg["&nbsp;&nbsp;&nbsp; Register Account &nbsp;&nbsp;&nbsp;"]
-            UC_Login["&nbsp;&nbsp;&nbsp; Log In &nbsp;&nbsp;&nbsp;"]
-            UC_Browse["&nbsp; Browse & Search Recipes &nbsp;"]
-        end
-
-        subgraph Auth_Features ["── Authenticated Features ──"]
-            UC_Plan["&nbsp; Manage Weekly Meal Plan &nbsp;"]
-            UC_List["&nbsp; Generate Grocery List &nbsp;"]
-            UC_Pantry["&nbsp; Manage Pantry Inventory &nbsp;"]
-            UC_Budget["&nbsp; Monitor Weekly Budget &nbsp;"]
-        end
-
-        subgraph Extensions ["── Extensions ──"]
-            UC_Filter["&nbsp; Filter by Dietary Tags &nbsp;"]
-            UC_Scale["&nbsp; Adjust Serving Sizes &nbsp;"]
-        end
+        UC0(["Create Account / Login"])
+        UC1(["Browse & Search Recipes"])
+        UC2(["Filter by Diet Tags"])
+        UC3(["Adjust Serving Sizes"])
+        UC4(["Manage Weekly Meal Plan"])
+        UC5(["Generate Grocery List"])
+        UC6(["Manage Pantry Inventory"])
+        UC7(["Monitor Weekly Budget"])
     end
 
-    %% ── Guest associations ──────────────────────────────────
-    Guest --> UC_Reg
-    Guest --> UC_Login
-    Guest --> UC_Browse
+    User --- UC0
+    User --- UC1
+    User --- UC3
+    User --- UC4
+    User --- UC6
 
-    %% ── Authenticated associations ──────────────────────────
-    Auth --> UC_Browse
-    Auth --> UC_Plan
-    Auth --> UC_List
-    Auth --> UC_Pantry
-    Auth --> UC_Budget
-
-    %% ── extend relationships ────────────────────────────────
-    UC_Browse -. "<<extend>>" .-> UC_Filter
-    UC_Browse -. "<<extend>>" .-> UC_Scale
-
-    %% ── include relationships ───────────────────────────────
-    UC_List -. "<<include>>" .-> UC_Plan
-    UC_List -. "<<include>>" .-> UC_Pantry
-
-    %% ── Styling (OVAL FORCING) ──────────────────────────────
-    %% High rx/ry values force rectangles into perfect ovals
-    classDef usecase fill:#d8f3dc,color:#1b4332,stroke:#74c69d,rx:100,ry:100
-    classDef ext fill:#fff9c4,color:#5c4a00,stroke:#f0c040,rx:100,ry:100
-    classDef actor fill:#2d6a4f,color:#fff,stroke:#1b4332
-
-    class Guest,Auth actor
-    class UC_Reg,UC_Login,UC_Browse,UC_Plan,UC_List,UC_Pantry,UC_Budget usecase
-    class UC_Filter,UC_Scale ext
+    UC1 -.->|requires auth| UC0
+    UC4 -.->|requires auth| UC0
+    UC1 -.->|«extend»| UC2
+    UC3 -.->|«extend»| UC1
+    UC4 -.->|«include»| UC5
+    UC5 -.->|«include»| UC6
+    UC4 -.->|«include»| UC7
 ```
 
-> 💡 **Explanation:** Two actors model the privilege split: **Guest User** can register, log in, and freely browse recipes; **Authenticated User** gains access to all protected features. `<<extend>>` relationships show that dietary filtering and serving-size scaling are optional extensions to browsing. `<<include>>` relationships on **Generate Grocery List** express that it *always* depends on the Meal Plan and Pantry Inventory data — these are mandatory sub-flows, not optional ones.
+> 💡 The **User** is the single actor who drives all interactions. **«include»** arrows show mandatory sub-flows (e.g. a Meal Plan always generates a Grocery List), while **«extend»** arrows show optional behaviour (e.g. Browse Recipes can be extended with Diet Tag filtering). All core features require the user to be authenticated via **Create Account / Login**.
 
 ---
-
 
 ## 2. Component Diagram
 
 Shows the **Client-Server architecture**. The React frontend communicates with the Express backend via JWT-authenticated REST API calls, persisting data in SQLite.
 
 ```mermaid
-flowchart TB
-    %% ── Client Environment ──────────────────────────────────
-    subgraph CE["🖥️  Client Environment"]
+graph TD
+    subgraph Browser["🌐 Client Browser"]
         direction TB
-        SPA[["&lt;&lt;component&gt;&gt;\nMealMate SPA\n(React.js)"]]
+        FE["⚛️ Frontend Application\n«component»\n(React + Vite)"]
+        Auth["🔐 AuthContext\n«component»\n(JWT → localStorage)"]
+        RecipeUI["🍳 Recipe Browser\n«component»\n& Search"]
+        MealPlanUI["📅 Meal Planner UI\n«component»"]
+        PantryUI["🧺 Pantry Manager UI\n«component»"]
+        BudgetUI["💰 Budget Tracker UI\n«component»"]
+        FE <--> Auth
+        FE --> RecipeUI
+        FE --> MealPlanUI
+        FE --> PantryUI
+        FE --> BudgetUI
     end
 
-    %% ── Server Environment ──────────────────────────────────
-    subgraph SE["⚙️  Server Environment  ·  Node.js / Express"]
+    subgraph Server["🖥️ Backend Server (Node.js + Express)"]
         direction TB
-
-        subgraph APIs["Provided Interfaces"]
-            direction LR
-            IAuth(["🔌 Authentication API"])
-            IRecipes(["🔌 Recipe API"])
-            IPlans(["🔌 Meal Planning API"])
-            IPantry(["🔌 Pantry API"])
-        end
-
-        AuthSvc[["&lt;&lt;component&gt;&gt;\nAuthentication\nService"]]
-        RecipeSvc[["&lt;&lt;component&gt;&gt;\nRecipe Management\nService"]]
-        PlanSvc[["&lt;&lt;component&gt;&gt;\nMeal Planner\nService"]]
-        PantrySvc[["&lt;&lt;component&gt;&gt;\nPantry & Budget\nService"]]
-
-        IAuth --- AuthSvc
-        IRecipes --- RecipeSvc
-        IPlans --- PlanSvc
-        IPantry --- PantrySvc
+        BE["🔀 API Gateway\n«component»\n& Controllers"]
+        AuthAPI["POST /api/auth/*\n«component»\nLogin & Register"]
+        RecipeAPI["GET/POST /api/recipes\n«component»\nRecipe CRUD"]
+        MealAPI["GET/POST /api/mealplans\n«component»\nMeal Plan CRUD"]
+        PantryAPI["GET/POST /api/pantry\n«component»\nPantry CRUD"]
+        DB[("💾 SQLite\nDatabase")]
+        BE --> AuthAPI
+        BE --> RecipeAPI
+        BE --> MealAPI
+        BE --> PantryAPI
+        AuthAPI <--> DB
+        RecipeAPI <--> DB
+        MealAPI <--> DB
+        PantryAPI <--> DB
     end
 
-    %% ── Database Host ───────────────────────────────────────
-    subgraph DB_ENV["🗃️  Database Host"]
-        DB[("SQLite\nDatabase")]
-    end
-
-    %% ── Client → Interface connections (REST/JSON) ──────────
-    SPA -. "REST/JSON" .-> IAuth
-    SPA -. "REST/JSON" .-> IRecipes
-    SPA -. "REST/JSON" .-> IPlans
-    SPA -. "REST/JSON" .-> IPantry
-
-    %% ── Services → Database (SQL) ───────────────────────────
-    AuthSvc -. "SQL" .-> DB
-    RecipeSvc -. "SQL" .-> DB
-    PlanSvc -. "SQL" .-> DB
-    PantrySvc -. "SQL" .-> DB
-
-    %% ── Styling ─────────────────────────────────────────────
-    classDef component fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
-    classDef iface fill:#fef9c3,stroke:#ca8a04,color:#713f12
-    classDef db fill:#dcfce7,stroke:#16a34a,color:#14532d
-
-    class SPA,AuthSvc,RecipeSvc,PlanSvc,PantrySvc component
-    class IAuth,IRecipes,IPlans,IPantry iface
-    class DB db
+    FE <-->|"REST API · JSON\nAuthorization: Bearer Token"| BE
 ```
 
-> 💡 **Explanation:** The diagram models a three-tier client-server architecture across distinct execution environments. The **Client Environment** hosts the compiled React SPA. The **Server Environment** exposes four provided interfaces (shown as oval nodes) — each fulfilled by a dedicated `<<component>>` (shown with double-bordered subroutine boxes). The **Database Host** holds the SQLite database accessed by the server-side components via SQL. All client-to-server communication uses JWT-authenticated REST/JSON; server-to-database communication uses parameterised SQL queries via `better-sqlite3`. The **Pantry & Budget Service** is intentionally unified because pantry stock deduction and budget cost calculation share the same ingredient pricing data.
-
+> 💡 MealMate follows a classic **Client-Server** pattern. The **React + Vite** frontend runs entirely in the browser, managing state through an `AuthContext` that persists the JWT in `localStorage`. Every protected API call attaches the token as a `Bearer` header. The **Node.js / Express** backend exposes four REST route groups (`/auth`, `/recipes`, `/mealplans`, `/pantry`), all backed by a single **SQLite** file.
 
 ---
 
-
 ## 3. Sequence Diagram
 
-Traces three end-to-end flows: **Authentication**, **Meal Planning**, and **Grocery / Pantry / Budget Resolution**. Together these flows cover the full critical path of the MealMate application.
+Traces the complete flow from **User Login** (JWT acquisition) through to **adding a recipe** to the weekly meal plan using the authenticated session.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User
-    participant UI  as Frontend (React)
-    participant Auth as AuthContext
-    participant API  as API Server (Express)
-    participant DB   as SQLite DB
+    participant UI as Frontend (React)
+    participant Auth as AuthContext (State / Storage)
+    participant API as API Server (Node / Express)
+    participant DB as SQLite DB
 
-    %% ══════════════════════════════════════════════
-    Note over User,DB: 🔐 Phase 1 — Authentication
-    %% ══════════════════════════════════════════════
+    Note over User,DB: 🔐 Authentication Phase
 
-    User->>UI: Submit email & password
+    User->>UI: Enter Email & Password
     UI->>API: POST /api/auth/login
     API->>DB: SELECT user WHERE email = ?
-    DB-->>API: { id, password_hash, name }
+    DB-->>API: Return password_hash & record
     API->>API: bcrypt.compare(password, hash)
+    API-->>UI: 200 OK { token, user }
+    UI->>Auth: Store JWT in localStorage
 
-    alt Credentials valid
-        API-->>UI: 200 OK { token, user }
-        UI->>Auth: Store JWT in localStorage
-        UI-->>User: ✅ Redirect to Dashboard
-    else Credentials invalid
-        API-->>UI: 401 Unauthorized
-        UI-->>User: ❌ "Invalid email or password"
-    end
+    Note over User,DB: 🍽️ Application Execution Phase
 
-    %% ══════════════════════════════════════════════
-    Note over User,DB: 🍽️ Phase 2 — Meal Planning
-    %% ══════════════════════════════════════════════
-
-    User->>UI: Browse recipes, apply dietary filter
-    UI->>API: GET /api/recipes?tag=Vegan
-    API->>DB: SELECT recipes WHERE tag = 'Vegan'
-    DB-->>API: [ Recipe[] ]
-    API-->>UI: 200 OK { recipes }
-    UI-->>User: Render filtered recipe cards
-
-    User->>UI: Assign recipe to day slot (with servings)
-    Auth-->>UI: Attach JWT to request
-    UI->>API: POST /api/mealplans/:id/items  [Bearer token]
+    User->>UI: Select Recipe for Meal Plan
+    Auth-->>UI: Provide JWT Token
+    UI->>API: POST /api/mealplans/items [Authorization: Bearer {token}]
     API->>API: jwt.verify(token, secret)
-    API->>DB: INSERT INTO meal_plan_items (recipe_id, day, servings)
-    DB-->>API: { id, recipe_id, day_of_week, servings }
-    API-->>UI: 201 Created { item }
-    UI->>UI: Update planner state
-    UI-->>User: ✅ Slot updated with recipe card
-
-    %% ══════════════════════════════════════════════
-    Note over User,DB: 🛒 Phase 3 — Grocery / Pantry / Budget
-    %% ══════════════════════════════════════════════
-
-    User->>UI: Open Grocery List
-    Auth-->>UI: Attach JWT
-    UI->>API: GET /api/grocery  [Bearer token]
-    API->>DB: SELECT meal_plan_items JOIN recipe_ingredients (scaled by servings)
-    DB-->>API: Raw ingredient rows
-    API->>API: Aggregate & merge identical ingredients (case-insensitive)
-    API->>DB: SELECT pantry_items WHERE user_id = ?
-    DB-->>API: Pantry stock rows
-    API->>API: Apply pantry deduction algorithm\n(Full → mark Owned, Partial → subtract qty)
-    API-->>UI: 200 OK { groceryList, budgetSummary }
-    UI-->>User: Render aggregated list + budget bar
-
-    alt Plan cost > weekly_budget
-        UI-->>User: ⚠️ "Over Budget" warning (red bar)
-    else Plan cost ≤ weekly_budget
-        UI-->>User: ✅ Budget bar green
-    end
+    API->>DB: CHECK Recipe & Plan exist
+    DB-->>API: Validated ✓
+    API->>DB: INSERT INTO meal_plan_items
+    DB-->>API: 201 { id, ... }
+    API-->>UI: 201 Created { item data }
+    UI->>UI: Update local state
+    UI-->>User: ✅ Visual success feedback
 ```
 
-> 💡 **Phase 1** shows the full login flow including the server-side bcrypt check and the JWT storage in `localStorage`, plus the error branch for invalid credentials. **Phase 2** covers recipe filtering and the authenticated meal-plan write — showing the JWT verification guard before any DB write. **Phase 3** models the full grocery resolution pipeline: ingredient aggregation from the planner, pantry deduction, and the budget-alert conditional that drives the visual warning in the UI.
+> 💡 The flow is split into two phases. In the **Authentication Phase** the frontend POSTs credentials, the server verifies the password hash with `bcrypt`, and returns a signed JWT that is stored in `localStorage`. In the **Application Execution Phase** the stored token is attached to subsequent requests; the server validates the signature with `jwt.verify()` before writing to the database, ensuring only authenticated users can modify meal plan data.
 
 ---
 
