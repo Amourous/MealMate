@@ -19,8 +19,8 @@ graph LR
     classDef subBox fill:#ffffff,stroke:#d1d5db,stroke-width:1px,stroke-dasharray: 5 5;
 
     %% Actors
-    Guest(("👤 Guest User")):::guestActor
-    Auth(("👤 Authenticated User")):::authActor
+    Guest["🧍<br/>Guest User"]:::guestActor
+    Auth["🧍<br/>Authenticated User"]:::authActor
 
     subgraph MealMate["MealMate System"]
         direction TB
