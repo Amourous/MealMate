@@ -70,17 +70,6 @@ graph LR
     style PublicArea fill:none,stroke:#cfd8dc
     style ExtensionArea fill:none,stroke:#cfd8dc
     style AuthArea fill:none,stroke:#cfd8dc
-    
-    %% True Oval Styling via SVG Attributes
-    style UC_Reg rx:100,ry:100
-    style UC_Log rx:100,ry:100
-    style UC_Browse rx:100,ry:100
-    style UC_Filter rx:100,ry:100
-    style UC_Scale rx:100,ry:100
-    style UC_Plan rx:100,ry:100
-    style UC_List rx:100,ry:100
-    style UC_Pantry rx:100,ry:100
-    style UC_Budget rx:100,ry:100
 ```
 
 > 💡 The **User** is the single actor who drives all interactions. **«include»** arrows show mandatory sub-flows (e.g. a Meal Plan always generates a Grocery List), while **«extend»** arrows show optional behaviour (e.g. Browse Recipes can be extended with Diet Tag filtering). All core features require the user to be authenticated via **Create Account / Login**.
