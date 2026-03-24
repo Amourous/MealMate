@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: white; }
+        .mermaid { background: white; border: 1px solid #eee; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Mermaid Component Tab Test</h1>
+    <div class="mermaid">
+flowchart TD
+    %% Test 4: Mermaid v10 Node Shapes
+    CompV10@{ shape: component, label: "«component»<br/>API Gateway" }
+    
+    style CompV10 fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });
+    </script>
+</body>
+</html>
