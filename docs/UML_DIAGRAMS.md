@@ -49,18 +49,17 @@ Shows the **Client-Server architecture**. The React frontend communicates with t
 
 ```mermaid
 flowchart TD
-    %% Define User Actor (using fontawesome for stick figure if needed, but in standard flowchart we use default nodes. 
-    %% Actually, for standard UML Component Diagrams, an external user/actor is often shown as a simple node or stick figure.
-    User(("👨‍💻 User"))
+    %% Define User Actor
+    User(("👨‍💻 User\n«actor»"))
 
     subgraph Browser["🌐 Client Browser"]
         direction TB
-        FE[["⚛️ Frontend Application\n(React + Vite)"]]
-        Auth[["🔐 AuthContext\n(JWT → localStorage)"]]
-        RecipeUI[["🍳 Recipe Browser\n& Search"]]
-        MealPlanUI[["📅 Meal Planner UI"]]
-        PantryUI[["🧺 Pantry Manager UI"]]
-        BudgetUI[["💰 Budget Tracker UI"]]
+        FE[["⚛️ Frontend Application\n«component»\n(React + Vite)"]]
+        Auth[["🔐 AuthContext\n«component»\n(JWT → localStorage)"]]
+        RecipeUI[["🍳 Recipe Browser\n«component»\n& Search"]]
+        MealPlanUI[["📅 Meal Planner UI\n«component»"]]
+        PantryUI[["🧺 Pantry Manager UI\n«component»"]]
+        BudgetUI[["💰 Budget Tracker UI\n«component»"]]
         FE <--> Auth
         FE --> RecipeUI
         FE --> MealPlanUI
@@ -70,11 +69,11 @@ flowchart TD
 
     subgraph Server["🖥️ Backend Server (Node.js + Express)"]
         direction TB
-        BE[["🔀 API Gateway\n& Controllers"]]
-        AuthAPI[["POST /api/auth/*\nLogin & Register"]]
-        RecipeAPI[["GET/POST /api/recipes\nRecipe CRUD"]]
-        MealAPI[["GET/POST /api/mealplans\nMeal Plan CRUD"]]
-        PantryAPI[["GET/POST /api/pantry\nPantry CRUD"]]
+        BE[["🔀 API Gateway\n«component»\n& Controllers"]]
+        AuthAPI[["POST /api/auth/*\n«component»\nLogin & Register"]]
+        RecipeAPI[["GET/POST /api/recipes\n«component»\nRecipe CRUD"]]
+        MealAPI[["GET/POST /api/mealplans\n«component»\nMeal Plan CRUD"]]
+        PantryAPI[["GET/POST /api/pantry\n«component»\nPantry CRUD"]]
         DB[("💾 SQLite\nDatabase")]
         BE --> AuthAPI
         BE --> RecipeAPI
