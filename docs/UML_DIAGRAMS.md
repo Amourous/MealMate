@@ -8,7 +8,6 @@ Visual representation of the MealMate system using standard UML notation, render
 
 Illustrates the core interactions between the **User** and the MealMate system, including Authentication, Meal Planning, and Pantry management flows.
 
-```mermaid
 ![Use Case Diagram](https://www.plantuml.com/plantuml/svg/SyfBBl9B249N4hDDZqXJdJ7iEjZ5l_uhfqg4Ca9N4hDDnqwnSYYuG_Z78FpcNEnAifMHDrPR)
 
 > 💡 The **User** is the single actor who drives all interactions. **«include»** arrows show mandatory sub-flows (e.g. a Meal Plan always generates a Grocery List), while **«extend»** arrows show optional behaviour (e.g. Browse Recipes can be extended with Diet Tag filtering). All core features require the user to be authenticated via **Create Account / Login**.
