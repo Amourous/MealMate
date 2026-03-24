@@ -70,4 +70,4 @@ UC_List ..> UC_Pantry : <<include>>
 @enduml
 """
 
-print(f"https://www.plantuml.com/plantuml/svg/{encode_plantuml(puml)}")
+print(f"https://www.plantuml.com/plantuml/svg/~1{encode_plantuml(puml)}")
