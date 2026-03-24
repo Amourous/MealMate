@@ -27,23 +27,23 @@ graph LR
         
         subgraph PublicArea["— Public Access —"]
             direction TB
-            UC_Reg(["&nbsp;&nbsp;Register Account&nbsp;&nbsp;"]):::usecase
-            UC_Log(["&nbsp;&nbsp;Log In&nbsp;&nbsp;"]):::usecase
-            UC_Browse(["&nbsp;&nbsp;Browse & Search Recipes&nbsp;&nbsp;"]):::usecase
+            UC_Reg@{ shape: ellipse, label: "Register Account" }:::usecase
+            UC_Log@{ shape: ellipse, label: "Log In" }:::usecase
+            UC_Browse@{ shape: ellipse, label: "Browse & Search Recipes" }:::usecase
         end
 
         subgraph ExtensionArea["— Extensions —"]
             direction TB
-            UC_Filter(["&nbsp;&nbsp;Filter by Dietary Tags&nbsp;&nbsp;"]):::extension
-            UC_Scale(["&nbsp;&nbsp;Adjust Serving Sizes&nbsp;&nbsp;"]):::extension
+            UC_Filter@{ shape: ellipse, label: "Filter by Dietary Tags" }:::extension
+            UC_Scale@{ shape: ellipse, label: "Adjust Serving Sizes" }:::extension
         end
 
         subgraph AuthArea["— Authenticated Features —"]
             direction TB
-            UC_Plan(["&nbsp;&nbsp;Manage Weekly Meal Plan&nbsp;&nbsp;"]):::usecase
-            UC_List(["&nbsp;&nbsp;Generate Grocery List&nbsp;&nbsp;"]):::usecase
-            UC_Pantry(["&nbsp;&nbsp;Manage Pantry Inventory&nbsp;&nbsp;"]):::usecase
-            UC_Budget(["&nbsp;&nbsp;Monitor Weekly Budget&nbsp;&nbsp;"]):::usecase
+            UC_Plan@{ shape: ellipse, label: "Manage Weekly Meal Plan" }:::usecase
+            UC_List@{ shape: ellipse, label: "Generate Grocery List" }:::usecase
+            UC_Pantry@{ shape: ellipse, label: "Manage Pantry Inventory" }:::usecase
+            UC_Budget@{ shape: ellipse, label: "Monitor Weekly Budget" }:::usecase
         end
     end
 
