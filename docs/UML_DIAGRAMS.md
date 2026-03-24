@@ -49,44 +49,36 @@ Shows the **Client-Server architecture**. The React frontend communicates with t
 
 ```mermaid
 flowchart TD
-    %% Define User Actor
-    User(("👨‍💻 User\n«actor»"))
-
-    subgraph Browser["🌐 Client Browser"]
+    subgraph ClientLayer ["🖥️ Client Side"]
         direction TB
-        FE[["⚛️ Frontend Application\n«component»\n(React + Vite)"]]
-        Auth[["🔐 AuthContext\n«component»\n(JWT → localStorage)"]]
-        RecipeUI[["🍳 Recipe Browser\n«component»\n& Search"]]
-        MealPlanUI[["📅 Meal Planner UI\n«component»"]]
-        PantryUI[["🧺 Pantry Manager UI\n«component»"]]
-        BudgetUI[["💰 Budget Tracker UI\n«component»"]]
-        FE <--> Auth
-        FE --> RecipeUI
-        FE --> MealPlanUI
-        FE --> PantryUI
-        FE --> BudgetUI
+        SPA[["«component»\nMealMate SPA"]]
     end
 
-    subgraph Server["🖥️ Backend Server (Node.js + Express)"]
+    subgraph ServerLayer ["⚙️ Server Side (Node.js/Express)"]
         direction TB
-        BE[["🔀 API Gateway\n«component»\n& Controllers"]]
-        AuthAPI[["POST /api/auth/*\n«component»\nLogin & Register"]]
-        RecipeAPI[["GET/POST /api/recipes\n«component»\nRecipe CRUD"]]
-        MealAPI[["GET/POST /api/mealplans\n«component»\nMeal Plan CRUD"]]
-        PantryAPI[["GET/POST /api/pantry\n«component»\nPantry CRUD"]]
-        DB[("💾 SQLite\nDatabase")]
-        BE --> AuthAPI
-        BE --> RecipeAPI
-        BE --> MealAPI
-        BE --> PantryAPI
-        AuthAPI <--> DB
-        RecipeAPI <--> DB
-        MealAPI <--> DB
-        PantryAPI <--> DB
+        Gateway[["«component»\nAPI Gateway"]]
+        AuthService[["«component»\nAuthentication Service"]]
+        RecipeService[["«component»\nRecipe Management Service"]]
+        MealPlanService[["«component»\nMeal Planning Service"]]
+        PantryService[["«component»\nPantry Management Service"]]
+
+        Gateway --> AuthService
+        Gateway --> RecipeService
+        Gateway --> MealPlanService
+        Gateway --> PantryService
     end
 
-    User -->|"Interacts with UI"| FE
-    FE <-->|"REST API · JSON\nAuthorization: Bearer Token"| BE
+    subgraph DataLayer ["💾 Data Layer"]
+        direction TB
+        DB[("«database»\nSQLite Database")]
+    end
+
+    SPA <-->|"REST API (JSON + JWT)"| Gateway
+    
+    AuthService <--> DB
+    RecipeService <--> DB
+    MealPlanService <--> DB
+    PantryService <--> DB
 ```
 
 > 💡 MealMate follows a classic **Client-Server** pattern. The **React + Vite** frontend runs entirely in the browser, managing state through an `AuthContext` that persists the JWT in `localStorage`. Every protected API call attaches the token as a `Bearer` header. The **Node.js / Express** backend exposes four REST route groups (`/auth`, `/recipes`, `/mealplans`, `/pantry`), all backed by a single **SQLite** file.
