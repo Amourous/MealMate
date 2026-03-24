@@ -10,18 +10,22 @@ Illustrates the core interactions between the **User** and the MealMate system, 
 
 ```mermaid
 graph LR
-    User(["👤 User"])
+    %% Custom Styling for UML Use Case
+    classDef actor fill:#f9fafb,stroke:#374151,stroke-width:2px;
+    classDef usecase fill:#ffffff,stroke:#2563eb,stroke-width:2px;
+
+    User["👤 User"]:::actor
 
     subgraph MealMate["🍽️ MealMate System"]
         direction TB
-        UC0(["Create Account / Login"])
-        UC1(["Browse & Search Recipes"])
-        UC2(["Filter by Diet Tags"])
-        UC3(["Adjust Serving Sizes"])
-        UC4(["Manage Weekly Meal Plan"])
-        UC5(["Generate Grocery List"])
-        UC6(["Manage Pantry Inventory"])
-        UC7(["Monitor Weekly Budget"])
+        UC0(["Create Account / Login"]):::usecase
+        UC1(["Browse & Search Recipes"]):::usecase
+        UC2(["Filter by Diet Tags"]):::usecase
+        UC3(["Adjust Serving Sizes"]):::usecase
+        UC4(["Manage Weekly Meal Plan"]):::usecase
+        UC5(["Generate Grocery List"]):::usecase
+        UC6(["Manage Pantry Inventory"]):::usecase
+        UC7(["Monitor Weekly Budget"]):::usecase
     end
 
     User --- UC0
@@ -30,13 +34,23 @@ graph LR
     User --- UC4
     User --- UC6
 
-    UC1 -.->|requires auth| UC0
-    UC4 -.->|requires auth| UC0
+    UC1 -.->|«include»| UC0
+    UC4 -.->|«include»| UC0
     UC1 -.->|«extend»| UC2
     UC3 -.->|«extend»| UC1
     UC4 -.->|«include»| UC5
     UC5 -.->|«include»| UC6
     UC4 -.->|«include»| UC7
+
+    %% Perfect Oval Overrides for Use Cases
+    style UC0 rx:20,ry:20
+    style UC1 rx:20,ry:20
+    style UC2 rx:20,ry:20
+    style UC3 rx:20,ry:20
+    style UC4 rx:20,ry:20
+    style UC5 rx:20,ry:20
+    style UC6 rx:20,ry:20
+    style UC7 rx:20,ry:20
 ```
 
 > 💡 The **User** is the single actor who drives all interactions. **«include»** arrows show mandatory sub-flows (e.g. a Meal Plan always generates a Grocery List), while **«extend»** arrows show optional behaviour (e.g. Browse Recipes can be extended with Diet Tag filtering). All core features require the user to be authenticated via **Create Account / Login**.
@@ -49,25 +63,22 @@ Shows the **Client-Server architecture**. The React frontend communicates with t
 
 ```mermaid
 flowchart TD
-    %% Custom Styling for Academic Presentation
+    %% Custom Styling for Component Diagram
     classDef layerBox fill:#f9fafb,stroke:#d1d5db,stroke-width:2px,stroke-dasharray: 5 5;
     classDef compNode fill:#ffffff,stroke:#2563eb,stroke-width:2px;
     classDef dbNode fill:#ffffff,stroke:#16a34a,stroke-width:2px;
-    classDef plainNode fill:none,stroke:none,color:#1f2937,font-weight:bold;
-
-    Client(("👤 Client\n«actor»"))
 
     subgraph ClientLayer ["🖥️ Client Tier"]
-        SPA[["«component»\nMealMate SPA"]]:::compNode
+        SPA["«component»<br/><b>MealMate SPA</b>"]:::compNode
     end
 
     subgraph ServerLayer ["⚙️ Application Tier (Node.js/Express)"]
-        Gateway[["«component»\nAPI Gateway"]]:::compNode
+        Gateway["«component»<br/><b>API Gateway</b>"]:::compNode
         
-        AuthService[["«component»\nAuthentication Service"]]:::compNode
-        RecipeService[["«component»\nRecipe Management Service"]]:::compNode
-        MealPlanService[["«component»\nMeal Planning Service"]]:::compNode
-        PantryService[["«component»\nPantry Management Service"]]:::compNode
+        AuthService["«component»<br/><b>Authentication Service</b>"]:::compNode
+        RecipeService["«component»<br/><b>Recipe Management</b>"]:::compNode
+        MealPlanService["«component»<br/><b>Meal Planning</b>"]:::compNode
+        PantryService["«component»<br/><b>Pantry Management</b>"]:::compNode
 
         Gateway --> AuthService
         Gateway --> RecipeService
@@ -76,15 +87,11 @@ flowchart TD
     end
 
     subgraph DataLayer ["💾 Data Tier"]
-        DB[("«database»\nSQLite")]:::dbNode
+        DB[("«database»<br/><b>SQLite</b>")]:::dbNode
     end
 
-    %% Central API Interface (creates spacing to prevent border overlap)
-    RestAPI[("REST API\n(JSON + JWT)")]:::plainNode
-
     %% Interactions
-    Client -.->|"Uses"| SPA
-    SPA <===> RestAPI <===> Gateway
+    SPA <====>|"REST API (JSON & JWT)"| Gateway
     
     %% Data Operations
     AuthService -.-> DB
