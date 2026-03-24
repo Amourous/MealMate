@@ -49,18 +49,22 @@ Shows the **Client-Server architecture**. The React frontend communicates with t
 
 ```mermaid
 flowchart TD
-    subgraph ClientLayer ["🖥️ Client Side"]
-        direction TB
-        SPA[["«component»\nMealMate SPA"]]
+    %% Custom Styling for Academic Presentation
+    classDef layerBox fill:#f9fafb,stroke:#d1d5db,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef compNode fill:#ffffff,stroke:#2563eb,stroke-width:2px;
+    classDef dbNode fill:#ffffff,stroke:#16a34a,stroke-width:2px;
+
+    subgraph ClientLayer ["🖥️ Client Tier"]
+        SPA[["«component»\nMealMate SPA"]]:::compNode
     end
 
-    subgraph ServerLayer ["⚙️ Server Side (Node.js/Express)"]
-        direction TB
-        Gateway[["«component»\nAPI Gateway"]]
-        AuthService[["«component»\nAuthentication Service"]]
-        RecipeService[["«component»\nRecipe Management Service"]]
-        MealPlanService[["«component»\nMeal Planning Service"]]
-        PantryService[["«component»\nPantry Management Service"]]
+    subgraph ServerLayer ["⚙️ Application Tier (Node.js/Express)"]
+        Gateway[["«component»\nAPI Gateway"]]:::compNode
+        
+        AuthService[["«component»\nAuthentication Service"]]:::compNode
+        RecipeService[["«component»\nRecipe Management Service"]]:::compNode
+        MealPlanService[["«component»\nMeal Planning Service"]]:::compNode
+        PantryService[["«component»\nPantry Management Service"]]:::compNode
 
         Gateway --> AuthService
         Gateway --> RecipeService
@@ -68,17 +72,21 @@ flowchart TD
         Gateway --> PantryService
     end
 
-    subgraph DataLayer ["💾 Data Layer"]
-        direction TB
-        DB[("«database»\nSQLite Database")]
+    subgraph DataLayer ["💾 Data Tier"]
+        DB[("«database»\nSQLite")]:::dbNode
     end
 
-    SPA <-->|"REST API (JSON + JWT)"| Gateway
+    %% Interactions
+    SPA <==>|"REST API\n(JSON + JWT)"| Gateway
     
-    AuthService <--> DB
-    RecipeService <--> DB
-    MealPlanService <--> DB
-    PantryService <--> DB
+    %% Data Operations
+    AuthService -.->|"SQL Query"| DB
+    RecipeService -.->|"SQL Query"| DB
+    MealPlanService -.->|"SQL Query"| DB
+    PantryService -.->|"SQL Query"| DB
+
+    %% Apply structural styling
+    class ClientLayer,ServerLayer,DataLayer layerBox
 ```
 
 > 💡 MealMate follows a classic **Client-Server** pattern. The **React + Vite** frontend runs entirely in the browser, managing state through an `AuthContext` that persists the JWT in `localStorage`. Every protected API call attaches the token as a `Bearer` header. The **Node.js / Express** backend exposes four REST route groups (`/auth`, `/recipes`, `/mealplans`, `/pantry`), all backed by a single **SQLite** file.
