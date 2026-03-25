@@ -267,8 +267,19 @@ classDiagram
         +Integer ingredient_id
         +Double quantity
         +String unit
-        +String expiry_date
         +DateTime updated_at
+    }
+
+    class Tag {
+        <<Entity>>
+        +Integer id
+        +String name
+    }
+
+    class RecipeTag {
+        <<Entity>>
+        +Integer recipe_id
+        +Integer tag_id
     }
 
     User "1" --> "0..*" MealPlan
@@ -276,9 +287,11 @@ classDiagram
     MealPlan "1" *-- "0..*" MealPlanItem : Contains
     MealPlanItem "0..*" o-- "1" Recipe : References
     Recipe "1" *-- "1..*" RecipeIngredient : Requires
+    Recipe "1" *-- "0..*" RecipeTag : Categorized By
     RecipeIngredient "0..*" o-- "1" Ingredient : Maps To
+    RecipeTag "0..*" o-- "1" Tag : References
     PantryItem "0..*" o-- "1" Ingredient : Maps To
     Ingredient "1" *-- "0..*" IngredientPrice : Priced As
 ```
 
-> 💡 Every **User** owns zero-or-more **MealPlan** and **PantryItem** records. A `MealPlan` is composed of `MealPlanItem` rows (one per meal slot), each referencing a **Recipe**. Recipes are built from `RecipeIngredient` join records that map to shared **Ingredient** entities — keeping ingredient names canonical. Each `Ingredient` has zero-or-more **IngredientPrice** entries used for budget calculation. `PantryItem` links a user's stock to the same `Ingredient` catalogue, and includes an `expiry_date` field for freshness tracking.
+> 💡 Every **User** owns zero-or-more **MealPlan** and **PantryItem** records. A `MealPlan` is composed of `MealPlanItem` rows (one per meal slot), each referencing a **Recipe**. Recipes are built from `RecipeIngredient` join records that map to shared **Ingredient** entities — keeping ingredient names canonical, and can be categorized using `RecipeTag` and `Tag` entities. Each `Ingredient` has zero-or-more **IngredientPrice** entries used for budget calculation. `PantryItem` links a user's stock to the same `Ingredient` catalogue.
