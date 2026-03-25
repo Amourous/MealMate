@@ -103,7 +103,7 @@ flowchart TD
         SPA["⊞ «component»<br/><b>MealMate SPA</b>"]:::compNode
     end
 
-    subgraph ServerLayer ["⚙️ Application Tier (Node.js/Express)"]
+    subgraph ServerLayer ["<br/>⚙️ Application Tier (Node.js/Express)"]
         Gateway["⊞ «component»<br/><b>API Gateway</b>"]:::compNode
         
         AuthService["⊞ «component»<br/><b>Authentication Service</b>"]:::compNode
@@ -121,10 +121,8 @@ flowchart TD
         DB[("«database»<br/><b>SQLite</b>")]:::dbNode
     end
 
-    %% Interactions (split to avoid label overlapping subgraph title)
-    SPA <==>|"REST API (JSON & JWT)"| _mid[" "]
-    _mid --- Gateway
-    style _mid fill:none,stroke:none,color:transparent
+    %% Interactions
+    SPA <==>|"REST API (JSON & JWT)"| Gateway
     
     %% Data Operations
     AuthService -.-> DB
