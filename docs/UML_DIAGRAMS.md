@@ -103,7 +103,7 @@ flowchart TD
         SPA["⊞ «component»<br/><b>MealMate SPA</b>"]:::compNode
     end
 
-    subgraph ServerLayer ["<br/>⚙️ Application Tier (Node.js/Express)"]
+    subgraph ServerLayer ["⚙️ Application Tier<br/>(Node.js/Express)"]
         Gateway["⊞ «component»<br/><b>API Gateway</b>"]:::compNode
         
         AuthService["⊞ «component»<br/><b>Authentication Service</b>"]:::compNode
