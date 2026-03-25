@@ -173,13 +173,11 @@ sequenceDiagram
 
     User->>UI: Select Recipe for Meal Plan
     Auth-->>UI: Provide JWT Token
-    UI->>API: POST /api/mealplans/items [Authorization: Bearer {token}]
+    UI->>API: POST /api/mealplans/{id}/items [Authorization: Bearer {token}]
     API->>API: jwt.verify(token, secret)
-    API->>DB: CHECK Recipe & Plan exist
-    DB-->>API: Validated ✓
-    API->>DB: INSERT INTO meal_plan_items
-    DB-->>API: 201 { id, ... }
-    API-->>UI: 201 Created { item data }
+    API->>DB: INSERT INTO meal_plan_items (Foreign Key validation)
+    DB-->>API: 201 Created (insert ID)
+    API-->>UI: 201 { id, message: 'Item added to meal plan' }
     UI->>UI: Update local state
     UI-->>User: ✅ Visual success feedback
 ```
