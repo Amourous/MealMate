@@ -43,3 +43,24 @@ Aggregated view of all ingredients needed for the week, with real-time budget tr
 Manage kitchen inventory with expiry date tracking and ingredient autocomplete powered by the recipe database.
 
 ![Pantry Manager](./assets/screenshots/06_pantry_manager.png)
+
+---
+
+## 🍽️ 07. Recipe Details
+Interactive recipe viewer directly accessible from the weekly planner or library.
+
+![Recipe Details](./assets/screenshots/07_meal_recipe.png)
+
+---
+
+## ⚠️ 08. Budget Alerts
+Real-time budget tracking turns red to alert users when their planned meals exceed the configured weekly budget.
+
+![Overbudget Alert](./assets/screenshots/08_meal_planner_overbudget.png)
+
+---
+
+## 🖨️ 09. Printable Grocery List
+A clean, ink-friendly export format for taking the aggregated ingredient list to the physical store.
+
+![Printable List](./assets/screenshots/09_grocery_list_printable.png)
