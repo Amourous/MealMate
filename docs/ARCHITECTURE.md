@@ -1,21 +1,9 @@
-# Architecture Documentation: MealMate
+﻿# Architecture Documentation: MealMate
 
 ## 1. System Context
 MealMate is a full-stack web application designed for meal planning and grocery management. It follows a client-server model where the frontend SPA interacts with a RESTful backend API for persistent data storage in a SQLite database.
 
-```mermaid
-graph TD
-    User((User))
-    subgraph "MealMate System Boundary"
-        Frontend[Frontend SPA]
-        Backend[Node.js Express API]
-        DB[(SQLite Database)]
-    end
-
-    User -->|Interacts with| Frontend
-    Frontend -->|REST API Calls| Backend
-    Backend -->|CRUD Operations| DB
-```
+![System Context](./assets/diagrams/system_context.png)
 
 ## 2. Building-Block Decomposition
 The system is decomposed into distinct layers for the frontend and backend:
@@ -30,27 +18,7 @@ The system is decomposed into distinct layers for the frontend and backend:
 - **Persistence Layer**: Data access logic using `better-sqlite3`.
 - **Database**: SQLite file-based storage for all persistent entity data.
 
-```mermaid
-graph LR
-    subgraph Frontend
-        UI[UI Components]
-        Domain[Domain Logic]
-        APIClient[API Service Layer]
-    end
-
-    subgraph Backend
-        Routes[API Routes]
-        DataLayer[Persistence Layer]
-    end
-
-    DB[(SQLite)]
-
-    UI --> Domain
-    Domain --> APIClient
-    APIClient -->|HTTP| Routes
-    Routes --> DataLayer
-    DataLayer --> DB
-```
+![Building-Block Decomposition](./assets/diagrams/decomposition.png)
 
 ## 3. Persistence Strategy
 - **Primary Source of Truth**: All core data (Recipes, Pantry, Meal Plans, Prices) is persisted in the **SQLite database**.
@@ -68,26 +36,7 @@ For local testing and development, a multi-container Docker setup provides a rep
 - **Backend Container**: Node.js/Express server on port `3000`.
 - **Persistent Volume**: Docker volume mapping `backend/data` to ensure SQLite data persists across container restarts.
 
-```mermaid
-graph TD
-    UserDevice[User Browser]
-    
-    subgraph "Local Development (Docker Compose)"
-        NGINX[Frontend Container:8080]
-        Express[Backend Container:3000]
-        DataVol[(Docker Volume)]
-    end
-
-    subgraph "Public Hosting"
-        CF[Cloudflare Pages]
-    end
-
-    UserDevice -->|Access UI| NGINX
-    UserDevice -->|Live Demo| CF
-    NGINX -->|Reverse Proxy/API Base| UserDevice
-    UserDevice -->|API Requests| Express
-    Express -->|Read/Write| DataVol
-```
+![Deployment View](./assets/diagrams/deployment.png)
 
 ## 5. Implementation Evidence
 - **API Endpoints**: The backend provides functional REST endpoints, such as `GET /api/recipes`, which serves the seeded recipe database.
@@ -95,4 +44,6 @@ graph TD
 
 ## 6. Detailed UML Diagrams
 For class-level abstractions and sequence diagrams, please refer to the **[UML Diagrams](UML_DIAGRAMS.md)** document.
+
+
 
