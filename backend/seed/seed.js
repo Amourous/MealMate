@@ -4,7 +4,9 @@ const seedData = () => {
     console.log('Seeding database...');
 
     // Ensure default user exists
-    db.prepare('INSERT OR IGNORE INTO users (id, name) VALUES (?, ?)').run(1, 'Demo User');
+    const bcrypt = require('bcryptjs');
+    const hash = bcrypt.hashSync('Demo1234!', 10);
+    db.prepare('INSERT OR IGNORE INTO users (id, name, email, password_hash) VALUES (?, ?, ?, ?)').run(1, 'Demo User', 'demo@mealmate.com', hash);
 
     const insertIngredient = db.prepare('INSERT OR IGNORE INTO ingredients (name, default_unit) VALUES (?, ?)');
     const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)');
