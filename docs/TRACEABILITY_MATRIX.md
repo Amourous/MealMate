@@ -12,7 +12,7 @@ The following matrix maps the Functional Requirements (FR) to the implementing m
 | FR ID | Requirement Name | Component / Module | Implementation Detail | Test Case ID | Test Type |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **FR-0** | User Authentication | `AuthContext.jsx`, `backend/routes/auth.js` | JWT-based session management with `bcrypt` password hashing and protected Express middleware. | `TC-B04` – `TC-B09` | Automated (API Integration) |
-| **FR-1** | Recipe Filtering | `RecipeLibrary.jsx` | Client-side filtering logic using `Array.filter()` against multiple dietary boolean flags. | `test-filter-diet` | Manual + Integration |
+| **FR-1** | Recipe Filtering | `RecipeLibrary.jsx` | Client-side filtering logic using `Array.filter()` against multiple dietary boolean flags. | `test-filter-diet` | Manual |
 | **FR-2** | Serving Scaling | `RecipeDetail.jsx`, `useScaling.js` | Dynamic ingredient quantity recalculation using a custom hook and utility conversion functions. | `test-scale-ingredients` | Manual |
 | **FR-3** | Weekly Planning | `WeeklyPlanner.jsx` | Grid-based drag-and-drop / click interface with backend persistence to the `meal_plan_items` table. | `test-add-to-plan`, `TC-F01` | Manual + Integration |
 | **FR-4** | Grocery Aggregation | `GroceryList.jsx` | Algorithm that sums quantities for identical ingredient IDs while maintaining unit compatibility. | `test-aggregate-grocery`, `TC-F01` | Manual + Integration |

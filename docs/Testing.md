@@ -10,7 +10,7 @@ This document reports the verification results for the project's Non-Functional 
 | **NFR-2** | Reliability | Data persistence rate | 100% | **100% (14/14 items)** | ✅ **PASS** | `better-sqlite3` Backend Query: Confirmed planned items are correctly stored in SQLite. |
 | **NFR-3** | Interface Consistency | API response standardization (JSON schema compliance) | 100% schema pass | **100%** (all endpoints) | ✅ **PASS** | Postman JSON Schema Validation: Verified all API responses conform to consistent structure and HTTP status codes. |
 | **NFR-4** | Portability | Docker compressed image size | < 200MB | **92.9MB** | ✅ **PASS** | `docker image ls` CLI: Verified the physical disk footprint of the production container. |
-| **NFR-5** | Security | Authentication enforcement | JWT required | **JWT enforced** | ✅ **PASS** | Backend tests: Verified all protected routes reject unauthenticated requests (401). |
+| **Security Verification** | Security | Authentication enforcement | JWT required | **JWT enforced** | ✅ **PASS** | Backend tests: Verified all protected routes reject unauthenticated requests (401). |
 
 ---
 
@@ -39,7 +39,7 @@ The following tables document specific manual and automated test cases used to v
   ```powershell
   Measure-Command { (New-Object System.Net.WebClient).DownloadString("http://localhost:8080") }
   ```
-- **Result**: The system consistently responds in under 100ms on localhost.
+- **Result**: The local test environment consistently returned responses in under 100 ms.
 
 ### 2. Reliability (NFR-2)
 - **Objective**: Confirm that user data (meal plans) is physically persisted in the database.
@@ -52,7 +52,7 @@ The following tables document specific manual and automated test cases used to v
   console.log('Planned Meals:', count);
   db.close();
   ```
-- **Result**: 14 items were successfully retrieved from the database after multiple reloads.
+- **Result**: Fourteen planned items were successfully retrieved from the database after repeated reloads.
 
 ### 3. Interface Consistency (NFR-3)
 - **Objective**: Ensure all API responses are standardized, well structured, and use consistent HTTP status codes.
