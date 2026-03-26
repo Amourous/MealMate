@@ -8,7 +8,7 @@ This document reports the verification results for the project's Non-Functional 
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **NFR-1** | Performance | Initial render time (FCP proxy) | < 0.8s | **~0.07s** (70ms) | ✅ **PASS** | `Measure-Command` (PowerShell): Measures HTTP response time from the local server. |
 | **NFR-2** | Reliability | Data persistence rate | 100% | **100% (14/14 items)** | ✅ **PASS** | `better-sqlite3` Backend Query: Confirmed planned items are correctly stored in SQLite. |
-| **NFR-3** | Usability | Accessibility Compliance (Manual Audit) | ≥ 95 | **98** (Semantic HTML) | ✅ **PASS** | Source Code Inspection: Verified ARIA labels, semantic tags, and form associations. |
+| **NFR-3** | Interface Consistency | API response standardization (JSON schema compliance) | 100% schema pass | **100%** (all endpoints) | ✅ **PASS** | Postman JSON Schema Validation: Verified all API responses conform to consistent structure and HTTP status codes. |
 | **NFR-4** | Portability | Docker compressed image size | < 200MB | **92.9MB** | ✅ **PASS** | `docker image ls` CLI: Verified the physical disk footprint of the production container. |
 | **NFR-5** | Security | Authentication enforcement | JWT required | **JWT enforced** | ✅ **PASS** | Backend tests: Verified all protected routes reject unauthenticated requests (401). |
 
@@ -54,13 +54,13 @@ The following tables document specific manual and automated test cases used to v
   ```
 - **Result**: 14 items were successfully retrieved from the database after multiple reloads.
 
-### 3. Usability & Accessibility (NFR-3)
-- **Objective**: Ensure the application is usable by everyone, including screen reader users.
-- **Basis for Target (≥ 95)**: Based on Web Content Accessibility Guidelines (WCAG) and automated auditing tools. While 100 is ideal, ≥ 95 is an industry gold standard that ensures critical accessibility elements (Semantic HTML, ARIA) are present while allowing a small margin for automated false-positives.
+### 3. Interface Consistency (NFR-3)
+- **Objective**: Ensure all API responses are standardized, well structured, and use consistent HTTP status codes.
+- **Basis for Target (100%)**: A consistent API contract is essential for frontend reliability and maintainability. All endpoints must return predictable JSON structures with appropriate HTTP status codes (200, 201, 400, 401, 409) to ensure seamless client-side integration.
 - **Findings**:
-  - **Semantic HTML**: Proper use of `<h1>` through `<h3>`, `<ul>`, and `<li>`.
-  - **ARIA**: Icon-only buttons include `aria-label` (e.g., `aria-label="Close"`).
-  - **Forms**: `<label>` elements are correctly linked to `<input>` via `htmlFor`.
+  - **JSON Structure**: All API responses return consistent `{ data }` or `{ error }` shapes.
+  - **Status Codes**: Correct HTTP codes used throughout (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 409 Conflict).
+  - **Schema Validation**: Postman JSON Schema tests confirm 100% compliance across all endpoints.
 
 ### 4. Portability (NFR-4)
 - **Objective**: Keep the deployment package small for rapid scaling and environment portability.

@@ -26,7 +26,7 @@ The following matrix maps the Functional Requirements (FR) to the implementing m
 | :--- | :--- | :--- | :--- |
 | **NFR-1** | Performance | Backend API Optimization | Postman API Performance Audit (< 200ms latency) |
 | **NFR-2** | Reliability | Backend API, SQLite database | Postman Automated Collection Tests |
-| **NFR-3** | Usability | Standardized JSON Responses | Postman JSON Schema Validations |
+| **NFR-3** | Interface Consistency | Standardized JSON Responses | Postman JSON Schema Validations |
 | **NFR-4** | Portability | `Dockerfile` (Alpine-based), Docker Compose | `docker build` and `docker run` validation |
 
 ## 3. Verification Summary
