@@ -109,13 +109,26 @@ if (!fs.existsSync(OUT_DIR)) {
             await page.type('input[type="number"]', '40');
             await wait(1000);
 
-            // Loop and drag the picker card to empty slots 15 times
-            for(let i=0; i<15; i++) {
+            // Loop and drag the picker card to empty slots 21 times
+            for(let i=0; i<21; i++) {
                 try {
                     await dragAndDrop(pickerCard, emptySlot);
-                    await wait(500); // Wait for drop animation and state update
+                    await wait(300); // Shorter wait for speed
                 } catch(e) {
-                    break; // stop if no more empty slots or error
+                    break; 
+                }
+            }
+            await wait(1500);
+
+            // To mathematically guarantee it goes over 40 euro, forcefully increase servings on a few slots
+            const srvBtns = await page.$$('button');
+            for (let btn of srvBtns) {
+                const text = await page.evaluate(el => el.textContent, btn);
+                if (text === '+') {
+                    for(let i=0; i<8; i++) {
+                        await btn.click();
+                        await wait(100);
+                    }
                 }
             }
             await wait(1500);
