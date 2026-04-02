@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { recipesApi } from '../../services/recipesApi.js';
+import { apiClient } from '../../services/apiClient.js';
 import { storageService } from '../../services/storageService.js';
 import { filterByTags, ALL_TAGS } from '../../engines/filterEngine.js';
 import { searchRecipes } from '../../engines/searchEngine.js';
@@ -17,6 +18,8 @@ export const TAG_LABELS = {
 export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [servings, setServings] = useState(recipe.servings);
     const [isSaving, setIsSaving] = useState(false);
+    const [macros, setMacros] = useState(null);
+    const [loadingMacros, setLoadingMacros] = useState(false);
 
     const scaled = useMemo(
         () => scaleIngredients(recipe.ingredients, recipe.servings, servings),
@@ -28,6 +31,23 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
         setIsSaving(true);
         await onSaveServings(recipe.id, servings);
         setIsSaving(false);
+    }
+
+    async function handleGetMacros() {
+        if (loadingMacros || macros) return;
+        setLoadingMacros(true);
+        try {
+            const data = await apiClient.post('/nutrition', {
+                recipeName: recipe.name,
+                ingredients: scaled, // current scaled quantities
+                servings: servings
+            });
+            setMacros(data);
+        } catch (error) {
+            alert('Failed to estimate nutrition.');
+        } finally {
+            setLoadingMacros(false);
+        }
     }
 
     return (
@@ -91,6 +111,26 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                 </ul>
 
                 <div className="divider" />
+                
+                <h3 className={styles.sectionLabel} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Nutrition & Macros
+                    <button 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={handleGetMacros} 
+                        disabled={loadingMacros || macros}
+                    >
+                        {loadingMacros ? 'Analyzing...' : macros ? 'Analyzed ✓' : '🔬 Calculate'}
+                    </button>
+                </h3>
+                
+                {macros && (
+                    <div style={{ display: 'flex', justifyContent: 'space-around', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '20px' }}>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.calories}</strong> <small>kcal</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.protein}g</strong> <small>Protein</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.carbs}g</strong> <small>Carbs</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.fat}g</strong> <small>Fat</small></div>
+                    </div>
+                )}
 
                 <h3 className={styles.sectionLabel}>Instructions</h3>
                 <ol className={styles.instructions}>
