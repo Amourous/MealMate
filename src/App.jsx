@@ -9,6 +9,7 @@ import Signup from './components/Authentication/Signup.jsx';
 import { AuthProvider, useAuth } from './components/Authentication/AuthContext.jsx';
 import CommunityRecipes from './components/CommunityRecipes/CommunityRecipes.jsx';
 import CreateRecipeForm from './components/CreateRecipeForm/CreateRecipeForm.jsx';
+import AIAssistantModal from './components/AIAssistantModal/AIAssistantModal.jsx';
 import { settingsApi } from './services/settingsApi.js';
 import { useEffect } from 'react';
 
@@ -97,6 +98,7 @@ export default function App() {
                             <Route path="*" element={<NotFound />} />
                         </Routes>
                     </main>
+                    <AIAssistantModal />
                 </div>
             </BrowserRouter>
         </AuthProvider>

@@ -57,6 +57,8 @@ const tagsRouter = require('./routes/tags');
 const pricesRouter = require('./routes/prices');
 const settingsRouter = require('./routes/settings');
 const ingredientsRouter = require('./routes/ingredients');
+const aiRouter = require('./routes/ai');
+const scrapeRouter = require('./routes/scrape');
 const { router: authRouter } = require('./routes/auth');
 
 app.use('/api/recipes', recipesRouter);
@@ -66,6 +68,8 @@ app.use('/api/tags', tagsRouter);
 app.use('/api/prices', pricesRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/ingredients', ingredientsRouter);
+app.use('/api/ai', aiRouter);
+app.use('/api/scrape', scrapeRouter);
 app.use('/api/auth', authRouter);
 
 // Health check

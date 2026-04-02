@@ -16,6 +16,8 @@ export default function CreateRecipeForm() {
     const [ingUnit, setIngUnit] = useState('pcs');
     const [loading, setLoading] = useState(false);
     const [availableIngredients, setAvailableIngredients] = useState([]);
+    const [scrapeUrl, setScrapeUrl] = useState('');
+    const [scraping, setScraping] = useState(false);
 
     useEffect(() => {
         apiClient.get('/ingredients')
@@ -65,11 +67,54 @@ export default function CreateRecipeForm() {
         }
     }
 
+    async function handleScrape() {
+        if (!scrapeUrl) return;
+        setScraping(true);
+        try {
+            const data = await apiClient.post('/scrape', { url: scrapeUrl });
+            if (data) {
+                setTitle(data.title || '');
+                setInstructions(data.instructions || '');
+                // Basic mapping of raw ingredients into our structure
+                if (data.ingredients && data.ingredients.length > 0) {
+                    const parsedIngs = data.ingredients.map(raw => ({
+                        name: raw,
+                        quantity: 1,
+                        unit: 'pcs'
+                    }));
+                    setIngredients(parsedIngs);
+                }
+            }
+        } catch (err) {
+            alert('Failed to import recipe from URL.');
+        } finally {
+            setScraping(false);
+        }
+    }
+
     return (
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
             <h1 className="section-title">Create a Recipe</h1>
             <p className="section-subtitle">Add your own recipe to MealMate</p>
             
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', padding: '15px', backgroundColor: '#eef2ff', borderRadius: '8px' }}>
+                <input 
+                    type="url" 
+                    placeholder="Auto-fill from URL (e.g. foodnetwork.com)" 
+                    value={scrapeUrl} 
+                    onChange={e => setScrapeUrl(e.target.value)} 
+                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c7d2fe' }}
+                />
+                <button 
+                    type="button" 
+                    onClick={handleScrape} 
+                    disabled={scraping || !scrapeUrl} 
+                    style={{ padding: '10px 15px', backgroundColor: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                    {scraping ? 'Importing...' : 'Import'}
+                </button>
+            </div>
+
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '30px' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Recipe Title</label>
