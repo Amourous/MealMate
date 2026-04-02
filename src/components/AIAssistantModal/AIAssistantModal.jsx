@@ -28,7 +28,7 @@ export default function AIAssistantModal() {
 
         try {
             const data = await apiClient.post('/ai/chat', { message: userMsg, history: messages });
-            setMessages(prev => [...prev, { role: 'ai', text: data.reply }]);
+            setMessages(prev => [...prev, { role: 'ai', text: data.reply || data.message || 'Error: Empty reply' }]);
         } catch (err) {
             setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I am having trouble connecting to my brain right now.' }]);
         } finally {

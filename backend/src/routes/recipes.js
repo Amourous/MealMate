@@ -68,7 +68,7 @@ router.get('/', (req, res) => {
                 id: recipe.id,
                 name: recipe.title, // Map backend 'title' to frontend 'name'
                 description: recipe.instructions.substring(0, 100) + '...',
-                instructions: recipe.instructions.split('\n').filter(l => l.trim()),
+                instructions: recipe.instructions.split(/\n|(?<=\.)\s+/).filter(l => l.trim()),
                 prepTime: 30, // Default estimate if not in DB
                 servings: recipe.default_servings || 2,
                 estimatedCostPerServing: 2.50, // Default estimate if not in DB

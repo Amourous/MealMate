@@ -20,6 +20,7 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [isSaving, setIsSaving] = useState(false);
     const [macros, setMacros] = useState(null);
     const [loadingMacros, setLoadingMacros] = useState(false);
+    const [macroError, setMacroError] = useState(null);
 
     const scaled = useMemo(
         () => scaleIngredients(recipe.ingredients, recipe.servings, servings),
@@ -34,17 +35,19 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     }
 
     async function handleGetMacros() {
-        if (loadingMacros || macros) return;
+        if (loadingMacros) return;
+        setMacroError(null);
+        setMacros(null);
         setLoadingMacros(true);
         try {
             const data = await apiClient.post('/nutrition', {
                 recipeName: recipe.name,
-                ingredients: scaled, // current scaled quantities
+                ingredients: scaled,
                 servings: servings
             });
             setMacros(data);
         } catch (error) {
-            alert('Failed to estimate nutrition.');
+            setMacroError('AI is temporarily unavailable. Please try again in a moment.');
         } finally {
             setLoadingMacros(false);
         }
@@ -117,12 +120,18 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                     <button 
                         className="btn btn-secondary btn-sm" 
                         onClick={handleGetMacros} 
-                        disabled={loadingMacros || macros}
+                        disabled={loadingMacros}
                     >
-                        {loadingMacros ? 'Analyzing...' : macros ? 'Analyzed ✓' : '🔬 Calculate'}
+                        {loadingMacros ? 'Analyzing...' : macros ? '🔄 Recalculate' : '🔬 Calculate'}
                     </button>
                 </h3>
                 
+                {macroError && (
+                    <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '10px', padding: '8px', backgroundColor: '#fef2f2', borderRadius: '6px' }}>
+                        ⚠️ {macroError}
+                    </p>
+                )}
+
                 {macros && (
                     <div style={{ display: 'flex', justifyContent: 'space-around', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '20px' }}>
                         <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.calories}</strong> <small>kcal</small></div>

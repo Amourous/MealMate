@@ -11,8 +11,7 @@ router.post('/', async (req, res) => {
         }
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // Use gemini-1.5-flash for fast reasoning
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompt = `
         You are a strict nutritionist AI. Calculate the estimated total nutritional macros for ONE serving of this recipe.

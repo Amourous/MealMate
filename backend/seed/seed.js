@@ -98,7 +98,7 @@ const seedData = () => {
         const recipes = [
             {
                 title: 'Simple Oatmeal',
-                instructions: 'Boil milk, add oats, stir for 5 minutes. Top with sliced banana and peanut butter.',
+                instructions: '1. In a small saucepan, bring the milk to a gentle simmer over medium heat.\n2. Stir in the rolled oats and reduce the heat to low.\n3. Cook for 5-7 minutes, stirring occasionally, until the oats are creamy and have absorbed most of the liquid.\n4. Remove the saucepan from the heat and let it sit for a minute to thicken further.\n5. Transfer the cooked oatmeal to a serving bowl.\n6. Top generously with freshly sliced banana and a drizzle or dollop of peanut butter.\n7. Serve warm and enjoy your nutritious breakfast!',
                 servings: 1,
                 tags: ['Breakfast', 'Vegan', 'Healthy'],
                 ingredients: [
@@ -110,7 +110,7 @@ const seedData = () => {
             },
             {
                 title: 'Classic Tomato Pasta',
-                instructions: 'Boil pasta. Sauté garlic and onion. Add chopped tomatoes. Simmer and mix with pasta.',
+                instructions: '1. Bring a large pot of generously salted water to a rolling boil.\n2. Add the pasta and cook according to the package instructions until al dente.\n3. Meanwhile, heat the olive oil in a large skillet over medium heat.\n4. Add the finely diced onion and sauté for 3-4 minutes until translucent and aromatic.\n5. Stir in the minced garlic and cook for an additional 30 seconds until fragrant, being careful not to burn it.\n6. Add the chopped fresh tomatoes to the skillet, along with a pinch of salt and pepper.\n7. Lower the heat and let the sauce simmer gently for 10-15 minutes until it thickens into a rich rustic sauce.\n8. Drain the pasta, reserving a small splash of pasta water, and toss the pasta directly into the skillet with the tomato sauce.\n9. Tear fresh basil leaves over the top and gently mix everything together.\n10. Serve hot, optionally garnished with extra olive oil and a sprinkle of parmesan cheese.',
                 servings: 2,
                 tags: ['Lunch', 'Dinner', 'Italian', 'Vegetarian'],
                 ingredients: [
@@ -124,7 +124,7 @@ const seedData = () => {
             },
             {
                 title: 'Chicken Stir-Fry',
-                instructions: 'Cut chicken and veggies. Fry everything in a wok with soy sauce and ginger.',
+                instructions: '1. Prepare your ingredients by cutting the chicken breast into bite-sized bite cubes, slicing the carrots into thin matchsticks, and cutting the broccoli into small florets.\n2. Heat the sesame oil in a large wok or deep skillet over medium-high heat until shimmering.\n3. Add the chicken pieces to the wok and stir-fry for 4-5 minutes until browned on all sides and cooked through.\n4. Remove the chicken from the wok and set aside on a plate.\n5. In the same wok, add a little extra oil if needed, then toss in the broccoli, carrots, and freshly minced ginger.\n6. Stir-fry the vegetables for 3-5 minutes until tender yet still crisp.\n7. Return the chicken to the wok.\n8. Pour the soy sauce over the mixture and toss continuously for 1-2 minutes until everything is evenly coated and heated through.\n9. Serve immediately over steamed rice or noodles.',
                 servings: 2,
                 tags: ['Dinner', 'High-Protein'],
                 ingredients: [
@@ -138,7 +138,7 @@ const seedData = () => {
             },
             {
                 title: 'Beef Tacos',
-                instructions: 'Brown beef with spices. Serve in tortillas with avocado and lime.',
+                instructions: '1. Heat a large skillet over medium-high heat.\n2. Add the ground beef, breaking it apart with a wooden spoon as it cooks.\n3. Continue cooking for 6-8 minutes until the beef is fully browned with no pink remaining, then carefully drain any excess fat.\n4. Stir the chili powder, cumin, and a splash of water into the beef.\n5. Simmer on low heat for 3-5 minutes, allowing the taco spices to deeply flavor the meat.\n6. While the meat simmers, warm the tortillas in a dry skillet or microwave until soft and pliable.\n7. Halve the avocado, remove the pit, and slice the flesh thinly.\n8. Cut the lime into wedges.\n9. Build your tacos by spooning a generous portion of the spiced beef into the center of each warm tortilla.\n10. Garnish with avocado slices and a fresh squeeze of lime juice before serving.',
                 servings: 3,
                 tags: ['Dinner', 'Mexican'],
                 ingredients: [
@@ -152,7 +152,7 @@ const seedData = () => {
             },
             {
                 title: 'Lentil Soup',
-                instructions: 'Simmer lentils with onions, carrots, and spices until soft.',
+                instructions: '1. Begin by thoroughly rinsing the lentils under cold running water in a fine mesh sieve until the water runs clear. Set aside.\n2. Finely dice the onions and carrots, and mince the garlic cloves.\n3. In a large heavy-bottomed soup pot or Dutch oven, heat a tablespoon of olive oil or water over medium heat.\n4. Add the diced onions and carrots, sautéing for 5-7 minutes until they are softened and the onions are translucent.\n5. Stir in the minced garlic and cook for 1 more minute until aromatic.\n6. Add the rinsed lentils to the pot, then pour in the vegetable broth.\n7. Bring the soup to a rolling boil, then immediately reduce the heat to low.\n8. Cover the pot and let the soup simmer very gently for 25-30 minutes, or until the lentils are completely tender and starting to break down.\n9. Stir the soup well. If you prefer a creamier texture, you can lightly blend a portion of the soup.\n10. Season generously with salt and pepper to taste before ladling into warm bowls.',
                 servings: 4,
                 tags: ['Lunch', 'Vegan', 'Healthy'],
                 ingredients: [

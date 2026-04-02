@@ -71,6 +71,11 @@ function handleMockRequest(endpoint, options = {}) {
         }
     }
 
+    // Handle AI Assistance
+    if (endpoint.includes('/ai')) {
+        return Promise.resolve({ reply: '🤖 [Demo Mode]: To use the live Gemini AI, please ensure your Node backend is running (cd backend && npm start).' });
+    }
+
     // Default empty success for other POST/PUT/DELETE
     return Promise.resolve({ message: 'Success (Demo Mode)', isDemo: true });
 }
