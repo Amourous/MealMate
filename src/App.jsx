@@ -7,6 +7,8 @@ import NotFound from './components/NotFound/NotFound.jsx';
 import Login from './components/Authentication/Login.jsx';
 import Signup from './components/Authentication/Signup.jsx';
 import { AuthProvider, useAuth } from './components/Authentication/AuthContext.jsx';
+import CommunityRecipes from './components/CommunityRecipes/CommunityRecipes.jsx';
+import CreateRecipeForm from './components/CreateRecipeForm/CreateRecipeForm.jsx';
 
 function Navbar() {
     const { user, logout } = useAuth();
@@ -19,6 +21,8 @@ function Navbar() {
                 {user ? (
                     <>
                         <li><NavLink to="/">Recipes</NavLink></li>
+                        <li><NavLink to="/community">Community</NavLink></li>
+                        <li><NavLink to="/create-recipe">Create Recipe</NavLink></li>
                         <li><NavLink to="/planner">Planner</NavLink></li>
                         <li><NavLink to="/grocery">Grocery List</NavLink></li>
                         <li><NavLink to="/pantry">Pantry</NavLink></li>
@@ -27,6 +31,7 @@ function Navbar() {
                 ) : (
                     <>
                         <li><NavLink to="/">Recipes</NavLink></li>
+                        <li><NavLink to="/community">Community</NavLink></li>
                         <li><NavLink to="/login">Login</NavLink></li>
                         <li><NavLink to="/signup">Signup</NavLink></li>
                     </>
@@ -77,6 +82,8 @@ export default function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/" element={<RecipeLibrary />} />
+                            <Route path="/community" element={<CommunityRecipes />} />
+                            <Route path="/create-recipe" element={<ProtectedRoute><CreateRecipeForm /></ProtectedRoute>} />
                             <Route path="/planner" element={<ProtectedRoute><MealPlanner /></ProtectedRoute>} />
                             <Route path="/grocery" element={<ProtectedRoute><GroceryList /></ProtectedRoute>} />
                             <Route path="/pantry" element={<ProtectedRoute><PantryManager /></ProtectedRoute>} />

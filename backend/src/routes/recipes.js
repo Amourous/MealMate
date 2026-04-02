@@ -2,6 +2,46 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../db');
 
+// GET /api/recipes/community - Get public community recipes
+router.get('/community', (req, res) => {
+    try {
+        const recipes = db.prepare('SELECT * FROM recipes WHERE is_public = 1').all();
+
+        const enhancedRecipes = recipes.map(recipe => {
+            const ingredients = db.prepare(`
+                SELECT i.name, ri.quantity as qty, ri.unit 
+                FROM recipe_ingredients ri 
+                JOIN ingredients i ON ri.ingredient_id = i.id 
+                WHERE ri.recipe_id = ?
+            `).all(recipe.id);
+
+            const dbTags = db.prepare(`
+                SELECT t.name 
+                FROM recipe_tags rt 
+                JOIN tags t ON rt.tag_id = t.id 
+                WHERE rt.recipe_id = ?
+            `).all(recipe.id);
+
+            return {
+                id: recipe.id,
+                name: recipe.title,
+                author_name: recipe.author_name,
+                description: recipe.instructions.substring(0, 100) + '...',
+                instructions: recipe.instructions.split('\n').filter(l => l.trim()),
+                prepTime: 30,
+                servings: recipe.default_servings || 2,
+                category: 'Community Share',
+                dietTags: dbTags.map(t => t.name.toLowerCase().replace(' ', '-')),
+                ingredients: ingredients
+            };
+        });
+
+        res.json(enhancedRecipes);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error', message: err.message });
+    }
+});
+
 // GET /api/recipes - Get all recipes with tags and ingredients for frontend display
 router.get('/', (req, res) => {
     try {
@@ -72,14 +112,14 @@ router.get('/:id', (req, res) => {
 
 // POST /api/recipes - Create recipe
 router.post('/', (req, res) => {
-    const { title, instructions, default_servings, ingredients, tags } = req.body;
+    const { title, instructions, default_servings, ingredients, tags, is_public, author_name } = req.body;
     if (!title) return res.status(400).json({ error: 'Title is required' });
 
     try {
         const insertTransaction = db.transaction(() => {
             const result = db.prepare(
-                'INSERT INTO recipes (user_id, title, instructions, default_servings) VALUES (?, ?, ?, ?)'
-            ).run(1, title, instructions, default_servings || 1);
+                'INSERT INTO recipes (user_id, title, instructions, default_servings, is_public, author_name) VALUES (?, ?, ?, ?, ?, ?)'
+            ).run(1, title, instructions, default_servings || 1, is_public ? 1 : 0, author_name || 'Unknown');
 
             const recipeId = result.lastInsertRowid;
 

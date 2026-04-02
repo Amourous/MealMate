@@ -42,6 +42,15 @@ export const recipesApi = {
     },
 
     /**
+     * Fetch community recipes from the backend.
+     * @returns {Promise<Array>}
+     */
+    getCommunity: async () => {
+        const data = await apiClient.get('/recipes/community');
+        return (Array.isArray(data) ? data : []).map(mapRecipe);
+    },
+
+    /**
      * Fetch a single recipe by ID with ingredients and tags.
      * @param {number|string} id 
      * @returns {Promise<Object>}
