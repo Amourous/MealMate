@@ -127,11 +127,21 @@ router.post('/', (req, res) => {
                 const insertRI = db.prepare(
                     'INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)'
                 );
+                const findIng = db.prepare('SELECT id FROM ingredients WHERE name = ?');
+                const insertIng = db.prepare('INSERT INTO ingredients (name, default_unit) VALUES (?, ?)');
+
                 ingredients.forEach(ing => {
-                    // Assuming ingredient_id is provided or resolved elsewhere
-                    // For simplicity, we assume ingredient_id is sent
-                    if (ing.ingredient_id) {
-                        insertRI.run(recipeId, ing.ingredient_id, ing.quantity, ing.unit);
+                    if (ing.name) {
+                        let ingId;
+                        const ingNameLower = ing.name.toLowerCase();
+                        const existing = findIng.get(ingNameLower);
+                        if (existing) {
+                            ingId = existing.id;
+                        } else {
+                            const newIng = insertIng.run(ingNameLower, ing.unit || '');
+                            ingId = newIng.lastInsertRowid;
+                        }
+                        insertRI.run(recipeId, ingId, ing.quantity || 1, ing.unit || '');
                     }
                 });
             }
