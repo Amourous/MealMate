@@ -1,3 +1,5 @@
+import { apiClient } from './apiClient.js';
+
 /**
  * StorageService – wraps all localStorage read/write operations.
  * All keys are prefixed with 'mealmate_' to avoid collisions.
@@ -55,7 +57,18 @@ export const storageService = {
     setPantry: (items) => write(keys.PANTRY, items),
 
     getSettings: () => read(keys.SETTINGS) ?? { budget: 40, currency: '€' },
-    setSettings: (s) => write(keys.SETTINGS, s),
+    setSettingsLocalOnly: (s) => write(keys.SETTINGS, s),
+    setSettings: (s) => {
+        write(keys.SETTINGS, s);
+        // Fire and forget cloud sync for persistence
+        if (read(keys.INITIALIZED)) {
+            apiClient.put('/settings', { 
+                budget: s.budget, 
+                currency: s.currency, 
+                recipeServings: s.recipeServings 
+            }).catch(err => console.error('Cloud Sync Failed:', err));
+        }
+    },
 
     clearAll: () => {
         Object.values(keys).forEach(remove);

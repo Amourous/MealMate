@@ -22,7 +22,17 @@ function migrate() {
         if (file.endsWith('.sql')) {
             console.log(`Applying migration: ${file}`);
             const schema = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
-            db.exec(schema);
+            try {
+                db.exec(schema);
+            } catch (err) {
+                if (err.message.includes('duplicate column name')) {
+                    console.log(`Skipping alteration in ${file}: Column already exists.`);
+                } else if (err.message.includes('already exists')) {
+                    console.log(`Skipping creation in ${file}: Entity already exists.`);
+                } else {
+                    throw err;
+                }
+            }
         }
     }
     console.log('Migrations completed successfully.');

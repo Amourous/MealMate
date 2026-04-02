@@ -9,6 +9,8 @@ import Signup from './components/Authentication/Signup.jsx';
 import { AuthProvider, useAuth } from './components/Authentication/AuthContext.jsx';
 import CommunityRecipes from './components/CommunityRecipes/CommunityRecipes.jsx';
 import CreateRecipeForm from './components/CreateRecipeForm/CreateRecipeForm.jsx';
+import { settingsApi } from './services/settingsApi.js';
+import { useEffect } from 'react';
 
 function Navbar() {
     const { user, logout } = useAuth();
@@ -66,6 +68,11 @@ function DemoBanner() {
 }
 
 export default function App() {
+    useEffect(() => {
+        // Sync settings down from cloud on startup
+        settingsApi.syncFromServer();
+    }, []);
+
     return (
         <AuthProvider>
             <BrowserRouter
