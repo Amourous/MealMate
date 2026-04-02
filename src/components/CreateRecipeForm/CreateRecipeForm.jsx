@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { recipesApi } from '../../services/recipesApi.js';
+import { apiClient } from '../../services/apiClient.js';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateRecipeForm() {
@@ -14,6 +15,13 @@ export default function CreateRecipeForm() {
     const [ingQty, setIngQty] = useState('');
     const [ingUnit, setIngUnit] = useState('pcs');
     const [loading, setLoading] = useState(false);
+    const [availableIngredients, setAvailableIngredients] = useState([]);
+
+    useEffect(() => {
+        apiClient.get('/ingredients')
+            .then(data => setAvailableIngredients(data || []))
+            .catch(err => console.error('Failed to load ingredients', err));
+    }, []);
 
     function handleAddIngredient(e) {
         e.preventDefault();
@@ -78,7 +86,12 @@ export default function CreateRecipeForm() {
                 <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Ingredients</label>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                        <input type="text" placeholder="Ingredient name (e.g. Tomato)" value={ingName} onChange={e => setIngName(e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                        <input type="text" list="ingredients-list" placeholder="Ingredient name (e.g. Tomato)" value={ingName} onChange={e => setIngName(e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                        <datalist id="ingredients-list">
+                            {availableIngredients.map(ing => (
+                                <option key={ing.id} value={ing.name} />
+                            ))}
+                        </datalist>
                         <input type="number" placeholder="Qty" value={ingQty} onChange={e => setIngQty(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                         <select value={ingUnit} onChange={e => setIngUnit(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
                             <option value="pcs">pcs</option>
