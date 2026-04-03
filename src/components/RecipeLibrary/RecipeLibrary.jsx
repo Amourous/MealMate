@@ -21,6 +21,7 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [macros, setMacros] = useState(null);
     const [loadingMacros, setLoadingMacros] = useState(false);
     const [macroError, setMacroError] = useState(null);
+    const [localDietTags, setLocalDietTags] = useState(recipe.dietTags || []);
 
     const scaled = useMemo(
         () => scaleIngredients(recipe.ingredients, recipe.servings, servings),
@@ -46,6 +47,9 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                 servings: servings
             });
             setMacros(data);
+            if (data && Array.isArray(data.dietTags)) {
+                setLocalDietTags(data.dietTags);
+            }
         } catch (error) {
             setMacroError('AI is temporarily unavailable. Please try again in a moment.');
         } finally {
@@ -67,9 +71,11 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                         <span>💶 €{recipe.estimatedCostPerServing.toFixed(2)} / serving</span>
                     </div>
                     <div className={styles.tagRow}>
-                        {recipe.dietTags.map((t) => (
-                            <span key={t} className={`tag tag-${t}`}>{TAG_LABELS[t]}</span>
-                        ))}
+                        {localDietTags?.map((t) => {
+                            const tagKey = t.toLowerCase();
+                            const fallbackLabel = t.charAt(0).toUpperCase() + t.slice(1);
+                            return <span key={t} className={`tag tag-${tagKey}`}>{TAG_LABELS[tagKey] || fallbackLabel}</span>;
+                        })}
                     </div>
                 </div>
 
@@ -133,18 +139,18 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                 )}
 
                 {macros && (
-                    <div style={{ display: 'flex', justifyContent: 'space-around', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '20px' }}>
-                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.calories}</strong> <small>kcal</small></div>
-                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.protein}g</strong> <small>Protein</small></div>
-                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.carbs}g</strong> <small>Carbs</small></div>
-                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#166534' }}>{macros.fat}g</strong> <small>Fat</small></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-around', backgroundColor: '#1e293b', padding: '15px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '20px' }}>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#4ade80' }}>{macros.calories}</strong> <small style={{ color: '#94a3b8' }}>kcal</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#4ade80' }}>{macros.protein}g</strong> <small style={{ color: '#94a3b8' }}>Protein</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#4ade80' }}>{macros.carbs}g</strong> <small style={{ color: '#94a3b8' }}>Carbs</small></div>
+                        <div style={{ textAlign: 'center' }}><strong style={{ display: 'block', fontSize: '1.2rem', color: '#4ade80' }}>{macros.fat}g</strong> <small style={{ color: '#94a3b8' }}>Fat</small></div>
                     </div>
                 )}
 
                 <h3 className={styles.sectionLabel}>Instructions</h3>
                 <ol className={styles.instructions}>
                     {recipe.instructions.map((step, i) => (
-                        <li key={i} className={styles.instructionStep}>{step}</li>
+                        <li key={i} className={styles.instructionStep}>{step.replace(/^\d+\.\s*/, '')}</li>
                     ))}
                 </ol>
             </div>

@@ -6,38 +6,40 @@ router.post('/', async (req, res) => {
     try {
         const { recipeName, ingredients, servings } = req.body;
         
-        if (!process.env.GEMINI_API_KEY) {
-            return res.status(500).json({ error: 'AI disabled. Missing GEMINI_API_KEY' });
-        }
-
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
         const prompt = `
-        You are a strict nutritionist AI. Calculate the estimated total nutritional macros for ONE serving of this recipe.
+        You are a strict nutritionist AI. Calculate the estimated total nutritional macros for ONE serving of this recipe and categorize its diet.
         Recipe Name: ${recipeName}
         Total Ingredients in Recipe:
         ${JSON.stringify(ingredients, null, 2)}
         Total Servings: ${servings}
 
-        You MUST ONLY return a valid JSON object exactly matching this format, with numerical values representing grams/kcal. DO NOT return markdown formatting like \`\`\`json.
+        You MUST ONLY return a valid JSON object exactly matching this format, with numerical values representing grams/kcal. Include an array of applicable diet tags (e.g. "vegan", "vegetarian", "dairy-free", "gluten-free", "high-protein").
         {
           "calories": number,
           "protein": number,
           "carbs": number,
-          "fat": number
+          "fat": number,
+          "dietTags": string[]
         }
         `;
         
-        const result = await model.generateContent(prompt);
-        let responseText = result.response.text().trim();
-        
-        // Strip markdown backticks if AI hallucinates them despite instructions
-        if (responseText.startsWith('```')) {
-            responseText = responseText.replace(/```json|```/g, '').trim();
+        const response = await fetch('http://127.0.0.1:11434/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'llama3',
+                prompt: prompt,
+                stream: false,
+                format: 'json'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.status}`);
         }
 
-        const macros = JSON.parse(responseText);
+        const data = await response.json();
+        const macros = JSON.parse(data.response);
 
         res.json(macros);
     } catch (error) {

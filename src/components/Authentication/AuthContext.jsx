@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authApi } from '../../services/authApi';
+import { supabase } from '../../services/supabaseClient.js';
+import { authApi } from '../../services/authApi.js';
 
 const AuthContext = createContext();
 
@@ -10,32 +11,30 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('mealmate_token');
-        const savedUser = localStorage.getItem('mealmate_user');
-        if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
+        // Get the current session on mount
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+            setLoading(false);
+        });
+
+        // Listen for login/logout events from Supabase
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const login = async (email, password) => {
-        const response = await authApi.login(email, password);
-        localStorage.setItem('mealmate_token', response.token);
-        localStorage.setItem('mealmate_user', JSON.stringify(response.user));
-        setUser(response.user);
-        return response; // Return to allow components to react
+        return await authApi.login(email, password);
     };
 
     const register = async (name, email, password) => {
-        const response = await authApi.register(name, email, password);
-        localStorage.setItem('mealmate_token', response.token);
-        localStorage.setItem('mealmate_user', JSON.stringify(response.user));
-        setUser(response.user);
+        return await authApi.register(name, email, password);
     };
 
-    const logout = () => {
-        localStorage.removeItem('mealmate_token');
-        localStorage.removeItem('mealmate_user');
+    const logout = async () => {
+        await authApi.logout();
         setUser(null);
     };
 

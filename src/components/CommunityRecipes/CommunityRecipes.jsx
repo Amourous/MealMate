@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { recipesApi } from '../../services/recipesApi.js';
+import { RecipeModal } from '../RecipeLibrary/RecipeLibrary.jsx';
 
 export default function CommunityRecipes() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedRecipe, setSelectedRecipe] = useState(null);
 
     useEffect(() => {
         recipesApi.getCommunity()
@@ -30,21 +32,36 @@ export default function CommunityRecipes() {
                     <p className="empty-state__text">No community recipes yet. Be the first to share one!</p>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
                     {recipes.map(r => (
-                        <div key={r.id} className="card" style={{ padding: '20px' }}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>
+                        <div 
+                            key={r.id} 
+                            className="card" 
+                            style={{ 
+                                padding: '15px 20px', 
+                                cursor: 'pointer', 
+                                transition: 'all 0.2s ease-in-out',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}
+                            onClick={() => setSelectedRecipe(r)}
+                        >
+                            <h3 style={{ margin: 0, color: 'var(--text-color)', fontSize: '1.2rem' }}>{r.name}</h3>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                 Shared by: {r.author_name || 'Anonymous'}
-                            </div>
-                            <h3 style={{ margin: '10px 0' }}>{r.name}</h3>
-                            <p style={{ color: 'var(--text-secondary)' }}>{r.description}</p>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                                <span className="tag">⏱ {r.prepTime} min</span>
-                                <span className="tag">🍽 {r.servings} servings</span>
                             </div>
                         </div>
                     ))}
                 </div>
+            )}
+
+            {selectedRecipe && (
+                <RecipeModal 
+                    recipe={selectedRecipe} 
+                    onClose={() => setSelectedRecipe(null)}
+                    // We don't pass onSaveServings because it's a community recipe, but we could if we wanted to allow saving preferences for them too.
+                />
             )}
         </div>
     );

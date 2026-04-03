@@ -1,44 +1,93 @@
-import { apiClient } from './apiClient.js';
+import { supabase } from './supabaseClient.js';
 
-/**
- * Maps backend pantry fields to frontend fields for consistency.
- */
 function mapPantryItem(item) {
     if (!item) return item;
     return {
         ...item,
+        name: item.ingredients?.name || item.name || 'Unknown',
         qty: item.quantity !== undefined ? item.quantity : item.qty,
-        quantity: item.quantity !== undefined ? item.quantity : item.qty // Keep both just in case
+        quantity: item.quantity !== undefined ? item.quantity : item.qty,
     };
 }
 
 export const pantryApi = {
     /**
-     * Fetch all pantry items for the default user.
-     * @returns {Promise<Array>}
+     * Fetch all pantry items for the current user
      */
     getAll: async () => {
-        const data = await apiClient.get('/pantry');
-        return (Array.isArray(data) ? data : []).map(mapPantryItem);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from('pantry_items')
+            .select('*, ingredients(name)')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw new Error(error.message);
+        return (data || []).map(mapPantryItem);
     },
 
     /**
-     * Add an item to the pantry.
-     * @param {Object} item { ingredient_id, quantity, unit }
-     * @returns {Promise<Object>}
+     * Add an item to the pantry
      */
     create: async (item) => {
-        const data = await apiClient.post('/pantry', item);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Upsert the ingredient first to get its ID
+        const { data: ingredient, error: ingError } = await supabase
+            .from('ingredients')
+            .upsert({ name: item.name || 'Unknown' }, { onConflict: 'name' })
+            .select()
+            .single();
+
+        if (ingError) throw new Error(ingError.message);
+
+        const { data, error } = await supabase
+            .from('pantry_items')
+            .insert({
+                user_id: user.id,
+                ingredient_id: ingredient.id,
+                quantity: parseFloat(item.quantity || item.qty) || 0,
+                unit: item.unit || 'pcs',
+                expiry_date: item.expiry_date || null,
+            })
+            .select('*, ingredients(name)')
+            .single();
+
+        if (error) throw new Error(error.message);
         return mapPantryItem(data);
     },
 
     /**
-     * Update an existing pantry item's quantity or unit.
+     * Update quantity/unit of an existing pantry item
      */
-    update: (id, updates) => apiClient.put(`/pantry/${id}`, updates),
+    update: async (id, updates) => {
+        const { data, error } = await supabase
+            .from('pantry_items')
+            .update({
+                quantity: updates.quantity ?? updates.qty,
+                unit: updates.unit,
+            })
+            .eq('id', id)
+            .select('*, ingredients(name)')
+            .single();
+
+        if (error) throw new Error(error.message);
+        return mapPantryItem(data);
+    },
 
     /**
-     * Remove an item from the pantry.
+     * Remove a pantry item by ID
      */
-    delete: (id) => apiClient.delete(`/pantry/${id}`),
+    delete: async (id) => {
+        const { error } = await supabase
+            .from('pantry_items')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw new Error(error.message);
+        return { message: 'Deleted' };
+    },
 };

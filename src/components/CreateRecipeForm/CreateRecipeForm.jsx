@@ -75,13 +75,49 @@ export default function CreateRecipeForm() {
             if (data) {
                 setTitle(data.title || '');
                 setInstructions(data.instructions || '');
-                // Basic mapping of raw ingredients into our structure
                 if (data.ingredients && data.ingredients.length > 0) {
-                    const parsedIngs = data.ingredients.map(raw => ({
-                        name: raw,
-                        quantity: 1,
-                        unit: 'pcs'
-                    }));
+                    const knownUnits = ['g', 'ml', 'tbsp', 'tsp', 'cup', 'cups', 'oz', 'ounce', 'ounces', 'lb', 'lbs', 'pound', 'pounds', 'can', 'cans', 'clove', 'cloves', 'piece', 'pieces', 'pinch', 'dash', 'slice', 'slices'];
+                    
+                    const parsedIngs = data.ingredients.map(raw => {
+                        const match = raw.trim().match(/^((?:\d+\s+)?\d+(?:\.\d+)?(?:[/]\d+)?|\d+)?\s*([a-zA-Z]+)?\s*(.*)/);
+                        if (!match) return { name: raw, quantity: 1, unit: 'pcs' };
+                        
+                        let qtyStr = match[1];
+                        let unit = match[2] ? match[2].toLowerCase() : '';
+                        let name = match[3] || raw;
+                    
+                        let quantity = 1;
+                        if (qtyStr) {
+                            qtyStr = qtyStr.trim();
+                            if (qtyStr.includes(' ')) {
+                                const [whole, frac] = qtyStr.split(' ');
+                                const [num, den] = frac.split('/');
+                                quantity = parseInt(whole) + (parseInt(num) / parseInt(den));
+                            } else if (qtyStr.includes('/')) {
+                                const [num, den] = qtyStr.split('/');
+                                quantity = parseInt(num) / parseInt(den);
+                            } else {
+                                quantity = parseFloat(qtyStr);
+                            }
+                        } else {
+                            // If there isn't a number at the start, don't force a unit
+                            return { name: raw, quantity: '', unit: '' };
+                        }
+                    
+                        if (unit && !knownUnits.includes(unit)) {
+                            name = unit + ' ' + name;
+                            unit = '';
+                        }
+                        
+                        if (isNaN(quantity)) quantity = 1;
+                        name = name.replace(/^of\s+/i, '').trim();
+                    
+                        return {
+                            name: name,
+                            quantity: Math.round(quantity * 100) / 100,
+                            unit: unit
+                        };
+                    });
                     setIngredients(parsedIngs);
                 }
             }
@@ -152,7 +188,11 @@ export default function CreateRecipeForm() {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {ingredients.map((ing, i) => (
                                 <li key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-                                    <span>{ing.quantity} {ing.unit} {ing.name}</span>
+                                    <span>
+                                        {ing.quantity !== '' && ing.quantity !== null ? ing.quantity + ' ' : ''}
+                                        {ing.unit && ing.unit !== 'pcs' ? ing.unit + ' ' : ''}
+                                        {ing.name}
+                                    </span>
                                     <button type="button" onClick={() => handleRemoveIngredient(i)} style={{ color: 'var(--danger-color)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
                                 </li>
                             ))}

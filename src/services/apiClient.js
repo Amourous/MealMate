@@ -76,6 +76,29 @@ function handleMockRequest(endpoint, options = {}) {
         return Promise.resolve({ reply: '🤖 [Demo Mode]: To use the live Gemini AI, please ensure your Node backend is running (cd backend && npm start).' });
     }
 
+    // Handle Nutrition
+    if (endpoint.includes('/nutrition')) {
+        return Promise.resolve({
+            calories: 450,
+            protein: 25,
+            carbs: 55,
+            fat: 15
+        });
+    }
+
+    // Handle Scrape
+    if (endpoint.includes('/scrape')) {
+        return Promise.resolve({
+            title: "Delicious Demo Recipe (Scraped)",
+            ingredients: [
+                "1 cup of Mock Milk",
+                "2 tablespoons of Demo Sugar",
+                "1 pinch of Magic Dust"
+            ],
+            instructions: "1. Hand-crafted because the site blocked the real scraper.\n2. Mix all ingredients.\n3. Bake for 30 minutes at 350°F."
+        });
+    }
+
     // Default empty success for other POST/PUT/DELETE
     return Promise.resolve({ message: 'Success (Demo Mode)', isDemo: true });
 }
@@ -109,8 +132,8 @@ async function request(endpoint, options = {}) {
 
         return response.json();
     } catch (error) {
-        // If it's a network error (failed to fetch), fallback to mock
-        if (error.name === 'TypeError' || error.message.includes('fetch')) {
+        // Fallback to mock on network error OR if specific services are failing (e.g. rate limit, blocked scrapers)
+        if (error.name === 'TypeError' || error.message.includes('fetch') || endpoint.includes('/ai') || endpoint.includes('/nutrition') || endpoint.includes('/scrape')) {
             return handleMockRequest(endpoint, options);
         }
         throw error;
