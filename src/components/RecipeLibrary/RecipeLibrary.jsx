@@ -22,6 +22,14 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [loadingMacros, setLoadingMacros] = useState(false);
     const [macroError, setMacroError] = useState(null);
     const [localDietTags, setLocalDietTags] = useState(recipe.dietTags || []);
+    const [isDuplicating, setIsDuplicating] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        recipesApi.getCurrentUser().then(setCurrentUser);
+    }, []);
+
+    const isOwner = currentUser?.id === recipe.user_id;
 
     const scaled = useMemo(
         () => scaleIngredients(recipe.ingredients, recipe.servings, servings),
@@ -54,6 +62,19 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
             setMacroError('AI is temporarily unavailable. Please try again in a moment.');
         } finally {
             setLoadingMacros(false);
+        }
+    }
+
+    async function handleDuplicate() {
+        setIsDuplicating(true);
+        try {
+            await recipesApi.duplicate(recipe.id);
+            alert('Recipe saved to your personal library! 🎉');
+            onClose();
+        } catch (error) {
+            alert('Failed to save recipe. Please log in first.');
+        } finally {
+            setIsDuplicating(false);
         }
     }
 
@@ -103,6 +124,16 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                             disabled={isSaving}
                         >
                             {isSaving ? 'Saving...' : '💾 Save as Default'}
+                        </button>
+                    )}
+                    {!isOwner && (
+                        <button 
+                            className="btn btn-primary btn-sm" 
+                            style={{ marginLeft: '10px', backgroundColor: '#3b82f6', color: 'white' }}
+                            onClick={handleDuplicate}
+                            disabled={isDuplicating}
+                        >
+                            {isDuplicating ? 'Saving...' : '⭐ Save to My Recipes'}
                         </button>
                     )}
                 </div>

@@ -11,6 +11,16 @@ dist/
 # Local Netlify folder
 .netlify
 
+# Cloudflare / Wrangler
+.wrangler/
+
+# Temporary / Result Files
+*_final.txt
+cf_projects.txt
+backend_logs.txt
+capture_log.txt
+mermaid_files.txt
+
 # Submission folder (local only)
 ElSayed-Omar_32105931_PSE/
 

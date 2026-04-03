@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { apiClient } from '../../services/apiClient.js';
+import { aiService } from '../../services/aiService.js';
 import './AIAssistantModal.css';
 
 export default function AIAssistantModal() {
@@ -27,9 +27,10 @@ export default function AIAssistantModal() {
         setLoading(true);
 
         try {
-            const data = await apiClient.post('/ai/chat', { message: userMsg, history: messages });
-            setMessages(prev => [...prev, { role: 'ai', text: data.reply || data.message || 'Error: Empty reply' }]);
+            const data = await aiService.chat(userMsg, messages);
+            setMessages(prev => [...prev, { role: 'ai', text: data.reply || 'Error: Empty reply' }]);
         } catch (err) {
+            console.error('AI Error:', err);
             setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I am having trouble connecting to my brain right now.' }]);
         } finally {
             setLoading(false);

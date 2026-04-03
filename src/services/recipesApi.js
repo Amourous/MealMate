@@ -47,6 +47,14 @@ function mapRecipe(r) {
 
 export const recipesApi = {
     /**
+     * Get the currently logged-in user
+     */
+    getCurrentUser: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        return user;
+    },
+
+    /**
      * Fetch all recipes belonging to the current user
      */
     getAll: async () => {
@@ -172,4 +180,67 @@ export const recipesApi = {
         if (error) throw new Error(error.message);
         return { message: 'Deleted' };
     },
+
+    /**
+     * "Clones" a community recipe to the current user's personal collection
+     */
+    duplicate: async (recipeId) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // 1. Fetch original recipe with ALL details
+        const fullRecipe = await recipesApi.getById(recipeId);
+
+        // 2. Insert new recipe copy
+        const { data: copy, error: copyError } = await supabase
+            .from('recipes')
+            .insert({
+                user_id: user.id,
+                title: `${fullRecipe.title} (Copy)`,
+                instructions: JSON.stringify(fullRecipe.instructions),
+                default_servings: fullRecipe.servings || 1,
+                is_public: false, // Personal copy
+                author_name: user.user_metadata?.name || user.email,
+            })
+            .select()
+            .single();
+
+        if (copyError) throw new Error(copyError.message);
+
+        // 3. Clone ingredients
+        for (const ing of fullRecipe.ingredients) {
+            const { data: ingredient } = await supabase
+                .from('ingredients')
+                .upsert({ name: ing.name }, { onConflict: 'name' })
+                .select()
+                .single();
+
+            if (ingredient) {
+                await supabase.from('recipe_ingredients').insert({
+                    recipe_id: copy.id,
+                    ingredient_id: ingredient.id,
+                    quantity: ing.quantity,
+                    unit: ing.unit,
+                });
+            }
+        }
+
+        // 4. Clone tags
+        for (const tagName of fullRecipe.dietTags) {
+            const { data: tag } = await supabase
+                .from('tags')
+                .upsert({ name: tagName }, { onConflict: 'name' })
+                .select()
+                .single();
+
+            if (tag) {
+                await supabase.from('recipe_tags').insert({
+                    recipe_id: copy.id,
+                    tag_id: tag.id,
+                });
+            }
+        }
+
+        return copy;
+    }
 };
