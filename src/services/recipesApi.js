@@ -24,7 +24,8 @@ function mapRecipe(r) {
     const ingredients = (r.recipe_ingredients || []).map(ri => ({
         name: ri.ingredients?.name || 'Unknown',
         quantity: ri.quantity,
-        unit: ri.unit,
+        qty: ri.quantity,   // alias used by scalingEngine & RecipeModal
+        unit: ri.unit || 'pcs',
     }));
 
     const dietTags = (r.recipe_tags || [])
