@@ -28,6 +28,7 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [localDietTags, setLocalDietTags] = useState(recipe.dietTags || []);
     const [isDuplicating, setIsDuplicating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [actionMessage, setActionMessage] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const currency = storageService.getSettings()?.currency || 'EUR';
 
@@ -85,12 +86,13 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
 
     async function handleDuplicate() {
         setIsDuplicating(true);
+        setActionMessage(null);
         try {
             await recipesApi.duplicate(recipe.id);
-            alert('Recipe saved to your personal library! 🎉');
-            onClose('RELOAD');
+            setActionMessage({ type: 'success', text: 'Recipe saved to your personal library! 🎉' });
+            setTimeout(() => onClose('RELOAD'), 1500);
         } catch (error) {
-            alert('Failed to save recipe. Please log in first.');
+            setActionMessage({ type: 'error', text: 'Failed to save recipe. Please log in first.' });
         } finally {
             setIsDuplicating(false);
         }
@@ -99,12 +101,13 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     async function handleDelete() {
         if (!window.confirm(`Are you sure you want to delete "${recipe.name}"? This cannot be undone.`)) return;
         setIsDeleting(true);
+        setActionMessage(null);
         try {
             await recipesApi.delete(recipe.id);
-            alert('Recipe deleted successfully!');
-            onClose('RELOAD');
+            setActionMessage({ type: 'success', text: 'Recipe deleted successfully!' });
+            setTimeout(() => onClose('RELOAD'), 1500);
         } catch (error) {
-            alert('Failed to delete recipe. ' + error.message);
+            setActionMessage({ type: 'error', text: 'Failed to delete recipe. ' + error.message });
         } finally {
             setIsDeleting(false);
         }
@@ -131,6 +134,21 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                         })}
                     </div>
                 </div>
+
+                {actionMessage && (
+                    <div style={{
+                        padding: '10px 15px',
+                        marginBottom: '15px',
+                        borderRadius: '6px',
+                        backgroundColor: actionMessage.type === 'error' ? '#3f1115' : '#14311c',
+                        color: actionMessage.type === 'error' ? '#fca5a5' : '#86efac',
+                        border: `1px solid ${actionMessage.type === 'error' ? '#7f1d1d' : '#166534'}`,
+                        fontSize: '14.5px',
+                        fontWeight: '500'
+                    }}>
+                        {actionMessage.type === 'error' ? '⚠️ ' : '✅ '}{actionMessage.text}
+                    </div>
+                )}
 
                 <div className={styles.servingSection}>
                     <div className={styles.servingControl}>
