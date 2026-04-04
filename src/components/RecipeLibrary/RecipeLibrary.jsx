@@ -56,6 +56,9 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
         setMacros(null);
         setLoadingMacros(true);
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             // Call the Cloudflare Pages Function directly — bypasses the old backend
             const res = await fetch('/api/nutrition', {
                 method: 'POST',
@@ -64,8 +67,10 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                     recipeName: recipe.name,
                     ingredients: scaled,
                     servings: servings
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || `HTTP ${res.status}`);

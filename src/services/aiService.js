@@ -5,6 +5,9 @@ export const aiService = {
      */
     chat: async (message, history = [], settings = {}) => {
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: {
@@ -16,7 +19,10 @@ export const aiService = {
                     language: settings.language || 'en',
                     dialect: settings.dialect || ''
                 }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
