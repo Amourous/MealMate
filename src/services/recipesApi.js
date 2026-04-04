@@ -245,37 +245,71 @@ export const recipesApi = {
 
         if (copyError) throw new Error(copyError.message);
 
-        // 3. Clone ingredients
+        // 3. Clone ingredients (non-blocking — recipe is already saved)
         for (const ing of fullRecipe.ingredients) {
-            const { data: ingredient } = await supabase
-                .from('ingredients')
-                .upsert({ name: ing.name }, { onConflict: 'name' })
-                .select()
-                .single();
+            try {
+                // First try to find the existing ingredient
+                let ingredient;
+                const { data: existing } = await supabase
+                    .from('ingredients')
+                    .select('id')
+                    .eq('name', ing.name)
+                    .single();
 
-            if (ingredient) {
-                await supabase.from('recipe_ingredients').insert({
-                    recipe_id: copy.id,
-                    ingredient_id: ingredient.id,
-                    quantity: ing.quantity,
-                    unit: ing.unit,
-                });
+                if (existing) {
+                    ingredient = existing;
+                } else {
+                    // Only insert if it doesn't exist
+                    const { data: created } = await supabase
+                        .from('ingredients')
+                        .insert({ name: ing.name })
+                        .select()
+                        .single();
+                    ingredient = created;
+                }
+
+                if (ingredient) {
+                    await supabase.from('recipe_ingredients').insert({
+                        recipe_id: copy.id,
+                        ingredient_id: ingredient.id,
+                        quantity: ing.quantity || 1,
+                        unit: ing.unit || 'pcs',
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not clone ingredient:', ing.name, e.message);
             }
         }
 
-        // 4. Clone tags
-        for (const tagName of fullRecipe.dietTags) {
-            const { data: tag } = await supabase
-                .from('tags')
-                .upsert({ name: tagName }, { onConflict: 'name' })
-                .select()
-                .single();
+        // 4. Clone tags (non-blocking)
+        for (const tagName of (fullRecipe.dietTags || [])) {
+            try {
+                let tag;
+                const { data: existing } = await supabase
+                    .from('tags')
+                    .select('id')
+                    .eq('name', tagName)
+                    .single();
 
-            if (tag) {
-                await supabase.from('recipe_tags').insert({
-                    recipe_id: copy.id,
-                    tag_id: tag.id,
-                });
+                if (existing) {
+                    tag = existing;
+                } else {
+                    const { data: created } = await supabase
+                        .from('tags')
+                        .insert({ name: tagName })
+                        .select()
+                        .single();
+                    tag = created;
+                }
+
+                if (tag) {
+                    await supabase.from('recipe_tags').insert({
+                        recipe_id: copy.id,
+                        tag_id: tag.id,
+                    });
+                }
+            } catch (e) {
+                console.warn('Could not clone tag:', tagName, e.message);
             }
         }
 
