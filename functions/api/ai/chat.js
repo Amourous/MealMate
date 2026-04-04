@@ -43,7 +43,7 @@ export async function onRequest(context) {
         const response = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
             messages: messages,
             stream: false,
-            max_tokens: 250,
+            max_tokens: 512,
             temperature: 0.7
         });
 

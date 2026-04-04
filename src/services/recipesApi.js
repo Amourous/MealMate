@@ -36,7 +36,7 @@ function mapRecipe(r) {
         ...r,
         name: r.title || r.name || 'Untitled Recipe',
         servings: r.default_servings || r.servings || 1,
-        prepTime: r.prepTime || 20,
+        prepTime: r.prep_time || r.prepTime || 20,
         description: r.description || 'A delicious meal.',
         category: r.category || 'Main Course',
         dietTags,
@@ -152,7 +152,7 @@ export const recipesApi = {
                 title: recipe.name || recipe.title || 'Untitled Recipe',
                 description: recipe.description || '',
                 category: recipe.category || 'Main Course',
-                prepTime: recipe.prepTime || 20,
+                prep_time: recipe.prepTime || 20,
                 estimated_cost_per_serving: recipe.estimatedCostPerServing || 5.0,
                 instructions: Array.isArray(recipe.instructions)
                     ? JSON.stringify(recipe.instructions)
@@ -241,7 +241,7 @@ export const recipesApi = {
                 title: `${fullRecipe.name || fullRecipe.title} (Copy)`,
                 description: fullRecipe.description || '',
                 category: fullRecipe.category || 'Main Course',
-                prepTime: fullRecipe.prepTime || 20,
+                prep_time: fullRecipe.prepTime || 20,
                 estimated_cost_per_serving: fullRecipe.estimatedCostPerServing || 5.0,
                 instructions: JSON.stringify(fullRecipe.instructions),
                 default_servings: fullRecipe.servings || 1,
