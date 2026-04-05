@@ -96,10 +96,27 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
         setActionMessage(null);
         try {
             await recipesApi.duplicate(recipe.id);
-            setActionMessage({ type: 'success', text: 'Recipe saved to your personal library! 🎉' });
-            setTimeout(() => onClose('RELOAD'), 1500);
+            await showAlert({
+                type: 'success',
+                title: 'Recipe Saved!',
+                message: 'This recipe was saved to your personal library.'
+            });
+            onClose('RELOAD');
         } catch (error) {
-            setActionMessage({ type: 'error', text: 'Failed to save: ' + (error.message || 'Please log in first.') });
+            // Check if error is unique constraint
+            if (error.message && error.message.includes('unique constraint')) {
+                await showAlert({
+                    type: 'info',
+                    title: 'Already Saved!',
+                    message: "You've already saved a recipe with this exact name to your library."
+                });
+            } else {
+                await showAlert({
+                    type: 'error',
+                    title: 'Save Failed',
+                    message: 'Failed to save: ' + (error.message || 'Unknown error.')
+                });
+            }
         } finally {
             setIsDuplicating(false);
         }

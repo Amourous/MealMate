@@ -77,9 +77,17 @@ export default function PantryManager() {
     const allIngredients = useMemo(() => {
         const names = new Set();
         recipes.forEach(r => {
-            // Check if ingredients exist (might be minimized list)
             if (r.ingredients) {
-                r.ingredients.forEach(ing => names.add(ing.name));
+                r.ingredients.forEach(ing => {
+                    const cleanName = (ing.name || '').trim();
+                    if (!cleanName) return;
+                    // Exclude names that start with a number/fraction (likely from old parser)
+                    if (/^[\d\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
+                    // Exclude overly long descriptive text
+                    if (cleanName.length > 35) return;
+                    
+                    names.add(cleanName);
+                });
             }
         });
         return Array.from(names).sort();

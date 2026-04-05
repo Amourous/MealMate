@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { recipesApi } from '../../services/recipesApi.js';
 import { apiClient } from '../../services/apiClient.js';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +22,45 @@ export default function CreateRecipeForm() {
     const [availableIngredients, setAvailableIngredients] = useState([]);
     const [scrapeUrl, setScrapeUrl] = useState('');
     const [scraping, setScraping] = useState(false);
+
+    // Autocomplete state
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const suggestionRef = useRef(null);
+
+    // Handle clicks outside of dropdown
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    function handleIngNameChange(e) {
+        const val = e.target.value;
+        setIngName(val);
+
+        if (val.trim()) {
+            const matches = availableIngredients
+                .map(i => i.name)
+                .filter(n => n && n.toLowerCase().includes(val.toLowerCase()) && n.toLowerCase() !== val.toLowerCase())
+                .slice(0, 5);
+            setSuggestions(matches);
+            setShowSuggestions(matches.length > 0);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    }
+
+    function selectSuggestion(name) {
+        setIngName(name);
+        setSuggestions([]);
+        setShowSuggestions(false);
+    }
 
     useEffect(() => {
         apiClient.get('/ingredients')
@@ -153,13 +192,52 @@ export default function CreateRecipeForm() {
 
                 <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>{t('recipes.ingredients', 'Ingredients')}</label>
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                        <input type="text" list="ingredients-list" placeholder="Ingredient name (e.g. Tomato)" value={ingName} onChange={e => setIngName(e.target.value)} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
-                        <datalist id="ingredients-list">
-                            {availableIngredients.map(ing => (
-                                <option key={ing.id} value={ing.name} />
-                            ))}
-                        </datalist>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1, position: 'relative' }} ref={suggestionRef}>
+                            <input 
+                                type="text" 
+                                placeholder="Ingredient name (e.g. Tomato)" 
+                                value={ingName} 
+                                onChange={handleIngNameChange} 
+                                onFocus={() => ingName.trim() && suggestions.length > 0 && setShowSuggestions(true)}
+                                autoComplete="off"
+                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} 
+                            />
+                            {showSuggestions && (
+                                <ul style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    left: 0,
+                                    right: 0,
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #c7d2fe',
+                                    borderRadius: '8px',
+                                    listStyle: 'none',
+                                    margin: '4px 0 0 0',
+                                    padding: '5px 0',
+                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                    zIndex: 10,
+                                    maxHeight: '150px',
+                                    overflowY: 'auto'
+                                }}>
+                                    {suggestions.map((s, idx) => (
+                                        <li 
+                                            key={idx} 
+                                            onClick={() => selectSuggestion(s)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                cursor: 'pointer',
+                                                color: '#334155'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f1f5f9'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                        >
+                                            {s}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                         <input type="number" placeholder="Qty" value={ingQty} onChange={e => setIngQty(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
                         <select value={ingUnit} onChange={e => setIngUnit(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
                             <option value="pcs">pcs</option>
