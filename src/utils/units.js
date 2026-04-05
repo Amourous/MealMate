@@ -139,16 +139,11 @@ export function formatQuantityUnit(quantity, unit, system = 'metric') {
 }
 
 /**
- * Returns a formatted string (e.g. "2 lbs" or "400 g")
+ * Returns a formatted string showing only the number (no unit label).
  */
 export function displayMeasurement(quantity, unit, system = 'metric') {
     if (!quantity && quantity !== 0) return '';
     const formatted = formatQuantityUnit(quantity, unit, system);
-    
-    // Check if it's "pcs" and if we should hide it
-    if (formatted.unit === 'pcs' || formatted.unit === 'pc') {
-        return `${formatted.qty}`;
-    }
-
-    return `${formatted.qty} ${formatted.unit}`.trim();
+    // Return only the number — no unit label (ml, g, oz, etc.)
+    return `${formatted.qty}`;
 }

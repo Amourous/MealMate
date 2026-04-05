@@ -83,6 +83,13 @@
     border-color: var(--primary);
 }
 
+.languageSelect {
+    background: #1a2a4a !important;
+    border-color: #3b5bdb !important;
+    color: #a5b4fc !important;
+    font-weight: 600;
+}
+
 .footer {
     padding: 16px 20px;
     border-top: 1px solid var(--border-color);
