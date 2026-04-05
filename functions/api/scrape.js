@@ -70,7 +70,7 @@ CRITICAL RULES:
 - Do not output markdown formatting like \`\`\`json.
 - Output ONLY the raw JSON object, nothing else.`;
 
-        const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
             messages: [
                 {
                     role: 'system',
@@ -79,7 +79,7 @@ CRITICAL RULES:
                 { role: 'user', content: prompt }
             ],
             stream: false,
-            max_tokens: 2000,
+            max_tokens: 3000,
             temperature: 0.1
         });
 

@@ -124,7 +124,7 @@ export default function CreateRecipeForm() {
                 }
             }
         } catch (err) {
-            alert('Failed to import recipe from URL.');
+            alert('Import failed: ' + (err.message || 'Unknown error'));
         } finally {
             setScraping(false);
         }
