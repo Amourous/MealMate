@@ -73,52 +73,27 @@ export default function CreateRecipeForm() {
         if (!scrapeUrl) return;
         setScraping(true);
         try {
-            const data = await apiClient.post('/scrape', { url: scrapeUrl });
+            const { storageService } = await import('../../services/storageService.js');
+            const measurementSystem = storageService.getSettings()?.measurementSystem || 'metric';
+
+            const data = await apiClient.post('/scrape', { url: scrapeUrl, measurementSystem });
             if (data) {
                 setTitle(data.title || '');
                 setInstructions(data.instructions || '');
                 if (data.ingredients && data.ingredients.length > 0) {
-                    const knownUnits = ['g', 'ml', 'tbsp', 'tsp', 'cup', 'cups', 'oz', 'ounce', 'ounces', 'lb', 'lbs', 'pound', 'pounds', 'can', 'cans', 'clove', 'cloves', 'piece', 'pieces', 'pinch', 'dash', 'slice', 'slices'];
-                    
-                    const parsedIngs = data.ingredients.map(raw => {
-                        const match = raw.trim().match(/^((?:\d+\s+)?\d+(?:\.\d+)?(?:[/]\d+)?|\d+)?\s*([a-zA-Z]+)?\s*(.*)/);
-                        if (!match) return { name: raw, quantity: 1, unit: 'pcs' };
-                        
-                        let qtyStr = match[1];
-                        let unit = match[2] ? match[2].toLowerCase() : '';
-                        let name = match[3] || raw;
-                    
-                        let quantity = 1;
-                        if (qtyStr) {
-                            qtyStr = qtyStr.trim();
-                            if (qtyStr.includes(' ')) {
-                                const [whole, frac] = qtyStr.split(' ');
-                                const [num, den] = frac.split('/');
-                                quantity = parseInt(whole) + (parseInt(num) / parseInt(den));
-                            } else if (qtyStr.includes('/')) {
-                                const [num, den] = qtyStr.split('/');
-                                quantity = parseInt(num) / parseInt(den);
-                            } else {
-                                quantity = parseFloat(qtyStr);
-                            }
-                        } else {
-                            // If there isn't a number at the start, don't force a unit
-                            return { name: raw, quantity: '', unit: '' };
+                    // Handle both structured objects {qty, unit, name} and legacy raw strings
+                    const parsedIngs = data.ingredients.map(item => {
+                        if (typeof item === 'object' && item !== null && 'name' in item) {
+                            // Already structured by AI
+                            return {
+                                name: (item.name || '').trim(),
+                                quantity: item.qty ?? item.quantity ?? 1,
+                                unit: item.unit || ''
+                            };
                         }
-                    
-                        if (unit && !knownUnits.includes(unit)) {
-                            name = unit + ' ' + name;
-                            unit = '';
-                        }
-                        
-                        if (isNaN(quantity)) quantity = 1;
-                        name = name.replace(/^of\s+/i, '').trim();
-                    
-                        return {
-                            name: name,
-                            quantity: Math.round(quantity * 100) / 100,
-                            unit: unit
-                        };
+                        // Fallback: parse raw string
+                        const raw = String(item).trim();
+                        return { name: raw, quantity: 1, unit: '' };
                     });
                     setIngredients(parsedIngs);
                 }

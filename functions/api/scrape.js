@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function: /api/scrape
- * Uses Jina AI to fetch markdown from a URL, then Workers AI to parse it into an organized recipe.
+ * Uses Jina AI to fetch markdown from a URL, then Workers AI to parse it into structured recipe JSON.
  */
 export async function onRequest(context) {
     const { request, env } = context;
@@ -11,12 +11,13 @@ export async function onRequest(context) {
 
     if (!env.AI) {
         return new Response(JSON.stringify({
-            error: 'AI binding not configured. Please ensure the AI binding is added in Cloudflare Pages settings.'
+            error: 'AI binding not configured.'
         }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
     try {
-        const { url } = await request.json();
+        const body = await request.json();
+        const { url, measurementSystem = 'metric' } = body;
 
         if (!url) {
             return new Response(JSON.stringify({ error: 'URL is required' }), {
@@ -25,7 +26,7 @@ export async function onRequest(context) {
             });
         }
 
-        // 1. Fetch raw markdown of the webpage using Jina AI's reader
+        // 1. Fetch raw markdown via Jina AI reader
         const jinaResponse = await fetch('https://r.jina.ai/' + url, {
             headers: { 'Accept': 'text/plain' }
         });
@@ -36,45 +37,52 @@ export async function onRequest(context) {
 
         const pageMarkdown = await jinaResponse.text();
 
-        // 2. Strip navigation/boilerplate noise — keep up to 15000 chars
+        // 2. Strip nav/footer noise, keep up to 15000 chars
         const cleanedContent = pageMarkdown
-            .replace(/\[.*?\]\(.*?\)/g, '')   // remove markdown links
+            .replace(/\[.*?\]\(.*?\)/g, '')
             .replace(/#{1,6}\s*(menu|nav|navigation|footer|header|cookie|subscribe|newsletter)/gi, '')
             .trim()
             .substring(0, 15000);
 
-        // 3. Pass markdown to Cloudflare Workers AI for structured JSON extraction
-        const prompt = `You are an expert culinary AI assistant. Below is the scraped text of a recipe webpage.
-The page may be in any language including Arabic, English, or others — extract faithfully in the original language.
+        const unitSystem = measurementSystem === 'imperial' ? 'imperial' : 'metric';
+        const unitExamples = unitSystem === 'metric'
+            ? 'g, kg, ml, l, tsp, tbsp, cup'
+            : 'oz, lb, fl oz, tsp, tbsp, cup';
 
-Your ONLY job is to extract:
-1. The recipe title
-2. The exact list of ingredients (quantities + names as shown)
-3. The step-by-step cooking instructions
+        // 3. Structured extraction prompt
+        const prompt = `You are an expert culinary AI. Extract the recipe from the webpage text below.
+The user's preferred measurement system is: ${unitSystem.toUpperCase()}.
 
 Webpage Text:
 ---
 ${cleanedContent}
 ---
 
-Return ONLY a strict JSON object with this exact structure:
+Return ONLY a raw JSON object with this exact structure:
 {
-    "title": "Recipe Title",
-    "ingredients": ["1 cup milk", "2 eggs", "100g flour"],
-    "instructions": "1. Do this.\\n2. Do that."
+  "title": "Recipe Title",
+  "ingredients": [
+    { "qty": 500, "unit": "g", "name": "boneless chicken" },
+    { "qty": 0.5, "unit": "tsp", "name": "Kashmiri red chili powder" }
+  ],
+  "instructions": "1. Do this.\\n2. Do that."
 }
 
-CRITICAL RULES:
-- Extract ONLY from the webpage text above — do NOT invent or hallucinate ingredients.
-- If the page is in Arabic, output the title, ingredients and instructions in Arabic.
-- Do not output markdown formatting like \`\`\`json.
-- Output ONLY the raw JSON object, nothing else.`;
+INGREDIENT RULES — follow every one strictly:
+1. STRUCTURED: Each ingredient must be an object with "qty" (number), "unit" (string), "name" (string).
+2. ONE UNIT SYSTEM: Use ${unitSystem} units only (${unitExamples}). If the recipe lists both (e.g. "500g (1.1 lbs)"), pick the ${unitSystem} one and discard the other.
+3. DECIMALS ONLY: Convert all fractions to decimals. ½ → 0.5, ¼ → 0.25, ¾ → 0.75, ⅓ → 0.33, ⅔ → 0.67, ⅛ → 0.125.
+4. RESOLVE RANGES: For ranges like "½ to ¾ tsp", pick the midpoint: 0.625. For "1 to 2 tbsp", pick 1.5.
+5. NAME ONLY: The "name" field must contain ONLY the ingredient name — no quantities, no units, no parenthetical alternatives like "(1.1 lbs)" or "(hung curd/thick curd)". Strip those out.
+6. LANGUAGE: If the page is in Arabic or another language, keep name in that language.
+7. NO HALLUCINATION: Extract ONLY what is on the page. Do not invent ingredients.
+8. Output ONLY the raw JSON object — no markdown, no \`\`\`json, no explanation.`;
 
         const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a precise data extractor. You always respond with valid JSON only, no code blocks, no explanation. Never invent ingredients — only use what is on the page.'
+                    content: 'You are a precise data extractor. Output valid JSON only. No code blocks. No explanation. Follow all rules exactly.'
                 },
                 { role: 'user', content: prompt }
             ],
@@ -85,16 +93,15 @@ CRITICAL RULES:
 
         const rawText = response.response || response.choices?.[0]?.message?.content || '';
 
-        // Extract JSON from the response
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            throw new Error('AI did not return valid JSON. Raw response: ' + rawText.substring(0, 200));
+            throw new Error('AI did not return valid JSON. Got: ' + rawText.substring(0, 300));
         }
 
         const parsed = JSON.parse(jsonMatch[0]);
 
         if (!parsed.title || !parsed.ingredients || parsed.ingredients.length === 0) {
-            throw new Error("Could not extract recipe from this page. The site may block scrapers.");
+            throw new Error('Could not extract recipe from this page. The site may block scrapers.');
         }
 
         return new Response(JSON.stringify({
@@ -108,7 +115,7 @@ CRITICAL RULES:
     } catch (err) {
         console.error('AI Scraper Error:', err);
         return new Response(JSON.stringify({
-            error: 'Failed to intelligently scrape URL',
+            error: 'Failed to scrape URL',
             details: err.message
         }), {
             status: 500,
@@ -116,3 +123,5 @@ CRITICAL RULES:
         });
     }
 }
+
+
