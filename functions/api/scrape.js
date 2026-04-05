@@ -36,39 +36,50 @@ export async function onRequest(context) {
 
         const pageMarkdown = await jinaResponse.text();
 
-        // 2. Pass markdown to Cloudflare Workers AI for structured JSON extraction
-        const prompt = `You are an expert culinary AI. Below is the full scraped text of a webpage. 
-Please extract the recipe title, a strict list of ingredients, and the step-by-step instructions.
-Format the instructions as a numbered string (e.g. "1. Do this.\\n2. Do that.").
-Format the ingredients as an array of strings.
+        // 2. Strip navigation/boilerplate noise — keep up to 15000 chars
+        const cleanedContent = pageMarkdown
+            .replace(/\[.*?\]\(.*?\)/g, '')   // remove markdown links
+            .replace(/#{1,6}\s*(menu|nav|navigation|footer|header|cookie|subscribe|newsletter)/gi, '')
+            .trim()
+            .substring(0, 15000);
+
+        // 3. Pass markdown to Cloudflare Workers AI for structured JSON extraction
+        const prompt = `You are an expert culinary AI assistant. Below is the scraped text of a recipe webpage.
+The page may be in any language including Arabic, English, or others — extract faithfully in the original language.
+
+Your ONLY job is to extract:
+1. The recipe title
+2. The exact list of ingredients (quantities + names as shown)
+3. The step-by-step cooking instructions
 
 Webpage Text:
 ---
-${pageMarkdown.substring(0, 8000)} 
+${cleanedContent}
 ---
 
-Return ONLY a strict JSON object matching this structure:
+Return ONLY a strict JSON object with this exact structure:
 {
     "title": "Recipe Title",
-    "ingredients": ["1 cup milk", "2 eggs"],
-    "instructions": "1. Mix.\\n2. Bake."
+    "ingredients": ["1 cup milk", "2 eggs", "100g flour"],
+    "instructions": "1. Do this.\\n2. Do that."
 }
 
-Rules:
-- Make sure to read the webpage text provided.
-- Do not output any markdown formatting like \`\`\`json.
-- Output ONLY the raw JSON object.`;
+CRITICAL RULES:
+- Extract ONLY from the webpage text above — do NOT invent or hallucinate ingredients.
+- If the page is in Arabic, output the title, ingredients and instructions in Arabic.
+- Do not output markdown formatting like \`\`\`json.
+- Output ONLY the raw JSON object, nothing else.`;
 
         const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a precise data extractor. You always respond with valid JSON only, no code blocks, no explanation.'
+                    content: 'You are a precise data extractor. You always respond with valid JSON only, no code blocks, no explanation. Never invent ingredients — only use what is on the page.'
                 },
                 { role: 'user', content: prompt }
             ],
             stream: false,
-            max_tokens: 1000,
+            max_tokens: 2000,
             temperature: 0.1
         });
 
@@ -77,13 +88,13 @@ Rules:
         // Extract JSON from the response
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            throw new Error('AI did not return valid JSON');
+            throw new Error('AI did not return valid JSON. Raw response: ' + rawText.substring(0, 200));
         }
 
         const parsed = JSON.parse(jsonMatch[0]);
 
         if (!parsed.title || !parsed.ingredients || parsed.ingredients.length === 0) {
-            throw new Error("Could not extract recipe from this page (bot protection).");
+            throw new Error("Could not extract recipe from this page. The site may block scrapers.");
         }
 
         return new Response(JSON.stringify({
