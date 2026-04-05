@@ -81,8 +81,8 @@ export default function PantryManager() {
                 r.ingredients.forEach(ing => {
                     const cleanName = (ing.name || '').trim();
                     if (!cleanName) return;
-                    // Exclude names that start with a number/fraction (likely from old parser)
-                    if (/^[\d\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
+                    // Exclude names that CONTAIN a number or fraction (e.g. "Garlic 1/2 cloves")
+                    if (/[\d\/\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
                     // Exclude overly long descriptive text
                     if (cleanName.length > 35) return;
                     

@@ -30,7 +30,6 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const [localDietTags, setLocalDietTags] = useState(recipe.dietTags || []);
     const [isDuplicating, setIsDuplicating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [actionMessage, setActionMessage] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const currency = storageService.getSettings()?.currency || 'EUR';
 
@@ -93,7 +92,6 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
 
     async function handleDuplicate() {
         setIsDuplicating(true);
-        setActionMessage(null);
         try {
             await recipesApi.duplicate(recipe.id);
             await showAlert({
@@ -133,13 +131,12 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
         if (!confirmed) return;
         
         setIsDeleting(true);
-        setActionMessage(null);
         try {
             await recipesApi.delete(recipe.id);
-            setActionMessage({ type: 'success', text: 'Recipe deleted successfully!' });
-            setTimeout(() => onClose('RELOAD'), 1500);
+            await showAlert({ type: 'success', title: 'Deleted', message: 'Recipe deleted successfully!' });
+            onClose('RELOAD');
         } catch (error) {
-            setActionMessage({ type: 'error', text: 'Failed to delete recipe. ' + error.message });
+            showAlert({ type: 'error', title: 'Delete Failed', message: 'Failed to delete recipe. ' + error.message });
         } finally {
             setIsDeleting(false);
         }
@@ -158,7 +155,7 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                         <span>⏱ {recipe.prepTime} min</span>
                         <span>💶 {formatCurrency(recipe.estimatedCostPerServing, currency)} / serving</span>
                     </div>
-                    <div className={styles.tagRow}>
+                <div className={styles.tagRow}>
                         {localDietTags?.map((t) => {
                             const tagKey = t.toLowerCase();
                             const fallbackLabel = t.charAt(0).toUpperCase() + t.slice(1);
@@ -166,21 +163,6 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
                         })}
                     </div>
                 </div>
-
-                {actionMessage && (
-                    <div style={{
-                        padding: '10px 15px',
-                        marginBottom: '15px',
-                        borderRadius: '6px',
-                        backgroundColor: actionMessage.type === 'error' ? '#3f1115' : '#14311c',
-                        color: actionMessage.type === 'error' ? '#fca5a5' : '#86efac',
-                        border: `1px solid ${actionMessage.type === 'error' ? '#7f1d1d' : '#166534'}`,
-                        fontSize: '14.5px',
-                        fontWeight: '500'
-                    }}>
-                        {actionMessage.type === 'error' ? '⚠️ ' : '✅ '}{actionMessage.text}
-                    </div>
-                )}
 
                 <div className={styles.servingSection}>
                     <div className={styles.servingControl}>
