@@ -267,11 +267,42 @@ export function RecipeModal({ recipe, onClose, onSaveServings }) {
     );
 }
 
+const FOOD_IMAGES = {
+    breakfast: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&h=250&fit=crop',
+    lunch: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=250&fit=crop',
+    dinner: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400&h=250&fit=crop',
+    snack: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400&h=250&fit=crop',
+    dessert: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=250&fit=crop',
+    appetizer: 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&h=250&fit=crop',
+    beverage: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=250&fit=crop',
+    salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop',
+    soup: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=250&fit=crop',
+    default: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400&h=250&fit=crop'
+};
+
+function getRecipeImage(recipe) {
+    const category = recipe.category?.toLowerCase() || '';
+    if (FOOD_IMAGES[category]) return FOOD_IMAGES[category];
+    const name = recipe.name?.toLowerCase() || '';
+    if (name.includes('salad')) return FOOD_IMAGES.salad;
+    if (name.includes('soup')) return FOOD_IMAGES.soup;
+    if (name.includes('breakfast')) return FOOD_IMAGES.breakfast;
+    if (name.includes('dessert') || name.includes('cake') || name.includes('cookie')) return FOOD_IMAGES.dessert;
+    if (name.includes('drink') || name.includes('smoothie')) return FOOD_IMAGES.beverage;
+    if (name.includes('appetizer') || name.includes('starter')) return FOOD_IMAGES.appetizer;
+    return FOOD_IMAGES.default;
+}
+
 function RecipeCard({ recipe, onDetail, onAddToPlan }) {
     const { t } = useTranslation();
     const currency = storageService.getSettings()?.currency || 'EUR';
+    const imageUrl = recipe.imageUrl || getRecipeImage(recipe);
     return (
         <div className={`card ${styles.recipeCard}`} onClick={() => onDetail(recipe)}>
+            <div className={styles.cardImageWrap}>
+                <img src={imageUrl} alt={recipe.name} className={styles.cardImage} loading="lazy" />
+                <div className={styles.cardImageOverlay}></div>
+            </div>
             <div className={styles.cardHeader}>
                 <span className={styles.cardCategory}>{recipe.category}</span>
                 <span className={styles.cardCost}>{formatCurrency(recipe.estimatedCostPerServing, currency)}/srv</span>
