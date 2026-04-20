@@ -26,18 +26,34 @@ export default function AIAssistantModal() {
 
         const userMsg = input.trim();
         setInput('');
-        setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+        
+        // Optimistically add the user message and an empty AI response
+        setMessages(prev => [
+            ...prev, 
+            { role: 'user', text: userMsg },
+            { role: 'ai', text: '' }
+        ]);
         setLoading(true);
 
         try {
             const currentSettings = storageService.getSettings();
             const language = currentSettings?.language || 'en';
             const dialect = currentSettings?.dialect || '';
-            const data = await aiService.chat(userMsg, messages, { language, dialect });
-            setMessages(prev => [...prev, { role: 'ai', text: data.reply || 'Error: Empty reply' }]);
+            
+            await aiService.chat(userMsg, messages, { language, dialect }, (currentText) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1].text = currentText;
+                    return newMessages;
+                });
+            });
         } catch (err) {
             console.error('AI Error:', err);
-            setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I am having trouble connecting to my brain right now.' }]);
+            setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1].text = 'Sorry, I am having trouble connecting to my brain right now.';
+                return newMessages;
+            });
         } finally {
             setLoading(false);
         }

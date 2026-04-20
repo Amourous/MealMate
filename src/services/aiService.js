@@ -3,7 +3,7 @@ export const aiService = {
      * Sends a message to MealMate AI (powered by Cloudflare Workers AI).
      * Uses a Cloudflare Pages Function as a secure proxy to the AI binding.
      */
-    chat: async (message, history = [], settings = {}) => {
+    chat: async (message, history = [], settings = {}, onChunk) => {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 60000);
@@ -29,10 +29,33 @@ export const aiService = {
                 throw new Error(errorData.error || 'Failed to connect to the Cloud AI brain');
             }
 
-            const data = await response.json();
-            return { 
-                reply: data.reply || 'Error: Empty reply'
-            };
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullReply = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            if (data.response) {
+                                fullReply += data.response;
+                                if (onChunk) onChunk(fullReply);
+                            }
+                        } catch (e) {
+                            // ignore parse errors for partial chunks
+                        }
+                    }
+                }
+            }
+
+            return { reply: fullReply || 'Error: Empty reply' };
         } catch (err) {
             console.error('Cloud AI Error:', err);
             throw err;

@@ -22,36 +22,32 @@ export async function onRequest(context) {
     try {
         const { message, history, language, dialect } = await request.json();
 
-        let dialectInstruction = '';
-        if (dialect) {
-            dialectInstruction = ` You MUST speak in the ${dialect} dialect/accent.`;
-        } else if (language && language !== 'en') {
-            dialectInstruction = ` You MUST speak in ${language} language.`;
-        }
+        let systemPrompt = 'You are MealMate AI, a helpful and slightly fun cooking assistant. You help users with recipes, ingredient substitutions, and meal planning. Keep your answers concise and helpful.';
+        if (language && language !== 'en') systemPrompt += ` You MUST speak in the ${language} language.`;
+        if (dialect) systemPrompt += ` You MUST use the ${dialect} dialect/accent.`;
 
         // 2. Prepare messages for Workers AI
+        const safeHistory = Array.isArray(history) ? history : [];
         const messages = [
-            { role: 'system', content: `You are MealMate AI, a helpful and slightly fun cooking assistant. You help users with recipes, ingredient substitutions, and meal planning. Keep your answers concise and helpful.${dialectInstruction}` },
-            ...history.map(m => ({
-                role: m.role === 'ai' ? 'assistant' : 'user',
-                content: m.text
+            { role: 'system', content: systemPrompt },
+            ...safeHistory.map(m => ({
+                role: (m && m.role === 'ai') ? 'assistant' : 'user',
+                content: (m && m.text) || ''
             })),
             { role: 'user', content: message }
         ];
 
         // 3. Run the AI Model (using Llama 3 8B instead of 3.1 to avoid 3046 timeout errors)
-        const response = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+        const stream = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
             messages: messages,
-            stream: false,
+            stream: true,
             max_tokens: 512,
             temperature: 0.7
         });
 
-        // 4. Return the result in the format the frontend expects
-        return new Response(JSON.stringify({ 
-            reply: response.response || response.choices?.[0]?.message?.content || "I couldn't generate a response." 
-        }), {
-            headers: { 'Content-Type': 'application/json' }
+        // 4. Return the event stream
+        return new Response(stream, {
+            headers: { 'Content-Type': 'text/event-stream' }
         });
 
     } catch (err) {

@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
-    instructions TEXT,
+    instructions JSONB,
     default_servings INTEGER DEFAULT 1 CHECK (default_servings > 0),
     is_public BOOLEAN DEFAULT FALSE,
     author_name TEXT DEFAULT 'Unknown',
