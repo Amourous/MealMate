@@ -134,7 +134,20 @@ export default function CreateRecipeForm() {
             const { storageService } = await import('../../services/storageService.js');
             const measurementSystem = storageService.getSettings()?.measurementSystem || 'metric';
 
-            const data = await apiClient.post('/scrape', { url: scrapeUrl, measurementSystem });
+            const response = await fetch('/.netlify/functions/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: scrapeUrl, measurementSystem })
+            });
+
+            if (!response.ok) {
+                throw new Error('Scrape failed');
+            }
+
+            const data = await response.json();
+            
             if (data) {
                 setTitle(data.title || '');
                 setInstructions(data.instructions || '');
