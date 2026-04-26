@@ -78,11 +78,10 @@ exports.handler = async (event, context) => {
         
         let resultText = data.result.response;
         
-        // Clean up markdown code blocks if the AI still included them
-        if (resultText.startsWith('\`\`\`json')) {
-            resultText = resultText.replace(/^\`\`\`json\\s*/, '').replace(/\\s*\`\`\`$/, '');
-        } else if (resultText.startsWith('\`\`\`')) {
-             resultText = resultText.replace(/^\`\`\`\\s*/, '').replace(/\\s*\`\`\`$/, '');
+        // Clean up markdown code blocks or conversational text
+        const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            resultText = jsonMatch[0];
         }
 
         let parsed;
@@ -90,7 +89,7 @@ exports.handler = async (event, context) => {
             parsed = JSON.parse(resultText);
         } catch (parseError) {
             console.error('Failed to parse JSON from AI:', resultText);
-            throw new Error('AI did not return valid JSON');
+            throw new Error('AI returned invalid JSON: ' + resultText);
         }
 
         if (!parsed.title || !parsed.ingredients || parsed.ingredients.length === 0) {
