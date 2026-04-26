@@ -18,6 +18,7 @@ export default function CreateRecipeForm() {
     const [ingName, setIngName] = useState('');
     const [ingQty, setIngQty] = useState('');
     const [ingUnit, setIngUnit] = useState('pcs');
+    const [ingWeight, setIngWeight] = useState('');
     const [loading, setLoading] = useState(false);
     const [availableIngredients, setAvailableIngredients] = useState([]);
     const [scrapeUrl, setScrapeUrl] = useState('');
@@ -84,9 +85,18 @@ export default function CreateRecipeForm() {
     function handleAddIngredient(e) {
         e.preventDefault();
         if (!ingName) return;
-        setIngredients([...ingredients, { name: ingName, quantity: parseFloat(ingQty) || 1, unit: ingUnit }]);
+        
+        let finalQty = parseFloat(ingQty) || 1;
+        let weight = parseFloat(ingWeight);
+        
+        if (!isNaN(weight) && weight > 0) {
+            finalQty = finalQty * weight;
+        }
+
+        setIngredients([...ingredients, { name: ingName, quantity: finalQty, unit: ingUnit }]);
         setIngName('');
         setIngQty('');
+        setIngWeight('');
         setIngUnit('pcs');
     }
 
@@ -218,8 +228,8 @@ export default function CreateRecipeForm() {
 
                 <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>{t('recipes.ingredients', 'Ingredients')}</label>
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start' }}>
-                        <div style={{ flex: 1, position: 'relative' }} ref={suggestionRef}>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 200px', position: 'relative' }} ref={suggestionRef}>
                             <input 
                                 type="text" 
                                 placeholder="Ingredient name (e.g. Tomato)" 
@@ -264,10 +274,13 @@ export default function CreateRecipeForm() {
                                 </ul>
                             )}
                         </div>
-                        <input type="number" placeholder="Qty" value={ingQty} onChange={e => setIngQty(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
+                        <input type="number" placeholder="Qty" value={ingQty} onChange={e => setIngQty(e.target.value)} style={{ width: '60px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} title="Number of pieces/items" />
+                        <span style={{ alignSelf: 'center', fontWeight: 'bold', color: '#64748b' }}>×</span>
+                        <input type="number" placeholder="Weight/pc" value={ingWeight} onChange={e => setIngWeight(e.target.value)} style={{ width: '90px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} title="Weight per piece (optional)" />
                         <select value={ingUnit} onChange={e => setIngUnit(e.target.value)} style={{ width: '80px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
                             <option value="pcs">pcs</option>
                             <option value="g">g</option>
+                            <option value="kg">kg</option>
                             <option value="ml">ml</option>
                             <option value="tbsp">tbsp</option>
                             <option value="tsp">tsp</option>
