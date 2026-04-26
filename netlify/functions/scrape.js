@@ -36,7 +36,7 @@ exports.handler = async (event, context) => {
         You are an expert culinary AI. Below is the full scraped text of a webpage. 
         Please extract the recipe title, a strict list of ingredients, and the step-by-step instructions.
         Format the instructions as a numbered string (e.g. "1. Do this.\\n2. Do that.").
-        Format the ingredients as an array of strings.
+        Format the ingredients as an array of objects, separating the name, quantity (number), and unit (string like "cup", "tbsp", "g", or "" if none).
 
         Webpage Text:
         ---
@@ -46,7 +46,7 @@ exports.handler = async (event, context) => {
         Return ONLY a strict JSON object matching this structure:
         {
             "title": "string",
-            "ingredients": ["string", "string"],
+            "ingredients": [{"name": "string", "quantity": number, "unit": "string"}],
             "instructions": "string"
         }
         `;
