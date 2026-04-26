@@ -8,7 +8,7 @@ export const aiService = {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-            const response = await fetch('/api/ai/chat', {
+            const response = await fetch('/.netlify/functions/ai-chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,33 +29,14 @@ export const aiService = {
                 throw new Error(errorData.error || 'Failed to connect to the Cloud AI brain');
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullReply = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-                        try {
-                            const data = JSON.parse(line.substring(6));
-                            if (data.response) {
-                                fullReply += data.response;
-                                if (onChunk) onChunk(fullReply);
-                            }
-                        } catch (e) {
-                            // ignore parse errors for partial chunks
-                        }
-                    }
-                }
+            const data = await response.json();
+            
+            // To simulate streaming for the UI component (which expects onChunk):
+            if (onChunk && data.reply) {
+                onChunk(data.reply);
             }
 
-            return { reply: fullReply || 'Error: Empty reply' };
+            return { reply: data.reply || 'Error: Empty reply' };
         } catch (err) {
             console.error('Cloud AI Error:', err);
             throw err;
