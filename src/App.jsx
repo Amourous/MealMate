@@ -5,6 +5,7 @@ import AIAssistantModal from './components/AIAssistantModal/AIAssistantModal.jsx
 import { settingsApi } from './services/settingsApi.js';
 import SettingsModal from './components/SettingsModal/SettingsModal.jsx';
 import Loader from './components/Loader/Loader.jsx';
+import AnimatedBackground from './components/AnimatedBackground/AnimatedBackground.jsx';
 
 const RecipeLibrary = lazy(() => import('./components/RecipeLibrary/RecipeLibrary.jsx'));
 const MealPlanner = lazy(() => import('./components/MealPlanner/MealPlanner.jsx'));
@@ -19,9 +20,16 @@ import { DialogProvider } from './components/DialogManager/DialogContext.jsx';
 
 import { useTranslation } from 'react-i18next';
 
-function Navbar({ onOpenSettings }) {
+const THEMES = [
+    { key: 'default', label: '🌑 Dark',  emoji: '🌑' },
+    { key: 'cyber',   label: '⚡ Cyber', emoji: '⚡' },
+    { key: 'zen',     label: '🌿 Zen',   emoji: '🌿' },
+];
+
+function Navbar({ onOpenSettings, theme, onCycleTheme }) {
     const { user, logout } = useAuth();
     const { t } = useTranslation();
+    const current = THEMES.find(th => th.key === theme) || THEMES[0];
 
     return (
         <nav className="navbar">
@@ -50,6 +58,13 @@ function Navbar({ onOpenSettings }) {
                     </>
                 )}
             </ul>
+            <button
+                className="theme-toggle-btn"
+                onClick={onCycleTheme}
+                title={`Theme: ${current.label}`}
+            >
+                {current.emoji}
+            </button>
         </nav>
     );
 }
@@ -82,11 +97,26 @@ function DemoBanner() {
 
 export default function App() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [theme, setTheme] = useState(() => localStorage.getItem('mm-theme') || 'default');
 
     useEffect(() => {
-        // Sync settings down from cloud on startup
         settingsApi.syncFromServer();
     }, []);
+
+    useEffect(() => {
+        if (theme === 'default') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        localStorage.setItem('mm-theme', theme);
+    }, [theme]);
+
+    const cycleTheme = () => {
+        const keys = THEMES.map(t => t.key);
+        const idx = keys.indexOf(theme);
+        setTheme(keys[(idx + 1) % keys.length]);
+    };
 
     return (
         <AuthProvider>
@@ -97,9 +127,14 @@ export default function App() {
                         v7_relativeSplatPath: true,
                     }}
                 >
+                    <AnimatedBackground />
                     <div className="app-layout">
                         <DemoBanner />
-                        <Navbar onOpenSettings={() => setIsSettingsOpen(true)} />
+                        <Navbar
+                            onOpenSettings={() => setIsSettingsOpen(true)}
+                            theme={theme}
+                            onCycleTheme={cycleTheme}
+                        />
                         <main className="main-content">
                             <Suspense fallback={<Loader />}>
                                 <Routes>

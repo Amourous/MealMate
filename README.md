@@ -3,7 +3,9 @@
 MealMate is a modern, high-performance meal planning and grocery management application. Built for efficiency and a premium user experience, it helps you organize your weekly meals, optimize your budget, and manage your pantry with ease.
 
 ## 🚀 Live Demo
-**[Check out the live application on Cloudflare Pages](https://mealmate-835.pages.dev)**
+**[Check out the live application on Netlify](https://mealmate-app.netlify.app)**
+
+> *Note: The backend API is hosted on Render, which may take ~50 seconds to spin up from sleep on the first request.*
 
 > **Demo Login Credentials:**
 > - **Email**: `demo@mealmate.com`
@@ -45,15 +47,15 @@ MealMate is a modern, high-performance meal planning and grocery management appl
 ---
 
 ## Architecture
-MealMate runs entirely on a modern Serverless edge architecture:
-- **Frontend**: React/Vite SPA hosted gracefully on Cloudflare Pages.
-- **Backend Edge Workers**: Serverless API routes (Cloudflare Workers) to handle AI and interactions.
+MealMate uses a decoupled SPA architecture:
+- **Frontend**: React/Vite SPA hosted gracefully on Netlify.
+- **Backend API**: Node.js/Express server hosted on Render.
 - **Database**: Supabase (PostgreSQL) for blazing-fast, relational data persistence.
 
 ```mermaid
 graph TD
-    A[Browser / Client] -->|Vite SPA| B(Cloudflare Pages CDN)
-    A <-->|REST API| C[Cloudflare Edge Workers]
+    A[Browser / Client] -->|Vite SPA| B(Netlify CDN)
+    A <-->|REST API| C[Express Backend on Render]
     C <-->|Database| D[(Supabase Postgres)]
     C <-->|AI Scraper| E(Jina AI + Llama 3)
 ```
@@ -69,7 +71,7 @@ npm install
 npm run dev
 ```
 
-Cloudflare Edge functions logic lives in `/functions/`. For production deployments, just commit your master branch and Cloudflare Pages CI handles the rest natively!
+The backend is located in the `/backend/` directory. For production deployments, connect your repository to Netlify for the frontend and Render for the backend!
 
 ---
 
@@ -78,9 +80,9 @@ Cloudflare Edge functions logic lives in `/functions/`. For production deploymen
 - **Core**: React 18 & Vite 5
 - **Styling**: Vanilla CSS (Custom Variable System)
 - **Database**: Supabase (Postgres)
-- **Compute**: Cloudflare Workers
-- **AI Models**: Llama 3.3 70B (Cloudflare Workers AI), Jina AI
-- **Hosting**: Cloudflare Pages
+- **Compute**: Node.js/Express (Render)
+- **AI Models**: Llama 3.3 70B (or Gemini API) & Jina AI
+- **Hosting**: Netlify (Frontend) & Render (Backend)
 
 ---
 
