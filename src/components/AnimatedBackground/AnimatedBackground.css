@@ -56,10 +56,10 @@
     z-index: 1;
 }
 
-[data-theme="cyber"] .grid-overlay {
+[data-theme="spicy"] .grid-overlay {
     background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(255, 94, 58, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 94, 58, 0.05) 1px, transparent 1px);
 }
 
 @keyframes float {

@@ -31,30 +31,30 @@
 }
 
 /* ── Themes ── */
-[data-theme="cyber"] {
-  --color-bg: #090a0f;
-  --color-surface: #12141f;
-  --color-surface2: #1b1e2e;
-  --color-border: #2d1b4e;
-  --color-primary: #00f0ff;
-  --color-primary-hover: #5cffff;
-  --color-accent: #ff00ea;
-  --color-success: #39ff14;
-  --color-text: #e0f2fe;
+[data-theme="spicy"] {
+  --color-bg: #140808;
+  --color-surface: #1f0d0d;
+  --color-surface2: #2b1313;
+  --color-border: #4a1c1c;
+  --color-primary: #ff5e3a;
+  --color-primary-hover: #ff7d5e;
+  --color-accent: #ffb84d;
+  --color-success: #4ade80;
+  --color-text: #fff1eb;
 }
 
-[data-theme="zen"] {
-  --color-bg: #f4f5f0;
+[data-theme="matcha"] {
+  --color-bg: #f5f7f2;
   --color-surface: #ffffff;
   --color-surface2: #e9ece4;
   --color-border: #d1d5cb;
-  --color-primary: #6b8e6b;
-  --color-primary-hover: #5a7a5a;
+  --color-primary: #7a9c7a;
+  --color-primary-hover: #658565;
   --color-accent: #d4a373;
   --color-success: #558b2f;
   --color-danger: #e07a5f;
   --color-text: #2f3e46;
-  --color-text-muted: #5c6b73;
+  --color-text-muted: #6b7a82;
 }
 
 

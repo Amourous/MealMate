@@ -21,9 +21,9 @@ import { DialogProvider } from './components/DialogManager/DialogContext.jsx';
 import { useTranslation } from 'react-i18next';
 
 const THEMES = [
-    { key: 'default', label: '🌑 Dark',  emoji: '🌑' },
-    { key: 'cyber',   label: '⚡ Cyber', emoji: '⚡' },
-    { key: 'zen',     label: '🌿 Zen',   emoji: '🌿' },
+    { key: 'default', label: '🌑 Midnight Kitchen', emoji: '🍳' },
+    { key: 'spicy',   label: '🌶️ Spicy Grill',    emoji: '🌶️' },
+    { key: 'matcha',  label: '🍵 Matcha Cafe',     emoji: '🍵' },
 ];
 
 function Navbar({ onOpenSettings, theme, onCycleTheme }) {
@@ -45,16 +45,16 @@ function Navbar({ onOpenSettings, theme, onCycleTheme }) {
                         <li><NavLink to="/planner">{t('nav.meal_plan', 'Planner')}</NavLink></li>
                         <li><NavLink to="/grocery">{t('nav.grocery_list', 'Grocery List')}</NavLink></li>
                         <li><NavLink to="/pantry">{t('nav.pantry', 'Pantry')}</NavLink></li>
-                        <li><button onClick={onOpenSettings} className="nav-btn">⚙️ {t('nav.settings', 'Settings')}</button></li>
                         <li><button onClick={logout} className="nav-logout-btn">{t('nav.logout', 'Logout')}</button></li>
+                        <li><button onClick={onOpenSettings} className="nav-btn" title="Settings">⚙️</button></li>
                     </>
                 ) : (
                     <>
                         <li><NavLink to="/">{t('nav.recipes', 'Recipes')}</NavLink></li>
                         <li><NavLink to="/community">{t('recipes.community', 'Community')}</NavLink></li>
-                        <li><button onClick={onOpenSettings} className="nav-btn">⚙️ {t('nav.settings', 'Settings')}</button></li>
                         <li><NavLink to="/login">{t('nav.login', 'Login')}</NavLink></li>
                         <li><NavLink to="/signup">{t('auth.sign_up', 'Signup')}</NavLink></li>
+                        <li><button onClick={onOpenSettings} className="nav-btn" title="Settings">⚙️</button></li>
                     </>
                 )}
             </ul>
