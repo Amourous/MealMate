@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { recipesApi } from '../../services/recipesApi.js';
 import { pantryApi } from '../../services/pantryApi.js';
@@ -7,6 +7,9 @@ import { generateGroceryList, deductPantry, groupByCategory, computeWeeklyCost }
 import { formatCurrency } from '../../utils/currency.js';
 import { displayMeasurement } from '../../utils/units.js';
 import styles from './GroceryList.module.css';
+
+const UNIT_OPTIONS = ['pcs', 'g', 'kg', 'ml', 'L', 'oz', 'lb', 'cup', 'tbsp', 'tsp'];
+const EMPTY_FORM = { name: '', qty: 1, weight: '', unit: 'pcs' };
 
 const CATEGORY_ICONS = {
     Produce: '🥦', Meat: '🥩', Fish: '🐟', 'Dairy & Eggs': '🥛',
@@ -25,6 +28,9 @@ export default function GroceryList() {
     const [checked, setChecked] = useState({});
     const [adjustments, setAdjustments] = useState({});
     const [pendingAction, setPendingAction] = useState(null);
+    const [manualItems, setManualItems] = useState(() => storageService.getManualGrocery());
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [formError, setFormError] = useState('');
 
     const currency = storageService.getSettings()?.currency || 'EUR';
     const budget = storageService.getSettings()?.budget ?? 40;
@@ -49,14 +55,58 @@ export default function GroceryList() {
     }, []);
 
     const rawList = useMemo(() => generateGroceryList(plan, recipes), [plan, recipes]);
-    
+
+    // Persist manual items whenever they change
+    useEffect(() => {
+        storageService.setManualGrocery(manualItems);
+    }, [manualItems]);
+
     const finalList = useMemo(() => {
         const adjustedList = rawList.map(item => {
             const adj = adjustments[item.id] || 0;
             return { ...item, qty: Math.max(0, item.qty + adj) };
         });
-        return deductEnabled ? deductPantry(adjustedList, pantry) : adjustedList;
-    }, [rawList, pantry, deductEnabled, adjustments]);
+        const autoList = deductEnabled ? deductPantry(adjustedList, pantry) : adjustedList;
+        return [...autoList, ...manualItems];
+    }, [rawList, pantry, deductEnabled, adjustments, manualItems]);
+
+    const handleFormChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
+        setFormError('');
+    }, []);
+
+    const handleAddManual = useCallback((e) => {
+        e.preventDefault();
+        if (!form.name.trim()) { setFormError('Please enter an ingredient name.'); return; }
+        const qty = parseFloat(form.qty);
+        if (isNaN(qty) || qty <= 0) { setFormError('Quantity must be a positive number.'); return; }
+
+        let finalQty = qty;
+        let finalUnit = form.unit;
+
+        // If weight is specified, multiply qty × weight and use the unit as the weight unit
+        if (form.weight !== '' && !isNaN(parseFloat(form.weight)) && parseFloat(form.weight) > 0) {
+            finalQty = qty * parseFloat(form.weight);
+            // Unit stays as chosen (g, kg, oz, lb etc.)
+        }
+
+        const newItem = {
+            id: `manual_${Date.now()}`,
+            name: form.name.trim(),
+            qty: finalQty,
+            unit: finalUnit,
+            category: 'Other',
+            isManual: true,
+        };
+        setManualItems(prev => [...prev, newItem]);
+        setForm(EMPTY_FORM);
+        setFormError('');
+    }, [form]);
+
+    const handleDeleteManual = useCallback((id) => {
+        setManualItems(prev => prev.filter(i => i.id !== id));
+    }, []);
 
     const categories = useMemo(() => groupByCategory(finalList), [finalList]);
     const baseCost = useMemo(() => computeWeeklyCost(plan, recipes), [plan, recipes]);
@@ -127,6 +177,58 @@ export default function GroceryList() {
                     </button>
                 </div>
 
+                {/* Manual Add Item Form */}
+                <form className={styles.addForm} onSubmit={handleAddManual} noValidate>
+                    <div className={styles.addFormTitle}>➕ Add Item Manually</div>
+                    <div className={styles.addFormRow}>
+                        <div className={styles.addFormGroup}>
+                            <label className={styles.addFormLabel}>Qty</label>
+                            <input
+                                id="manual-qty"
+                                className={styles.addFormInput}
+                                type="number" name="qty" min="0.01" step="any"
+                                value={form.qty} onChange={handleFormChange}
+                                placeholder="1"
+                            />
+                        </div>
+                        <div className={styles.addFormGroup}>
+                            <label className={styles.addFormLabel}>Weight/pc <span className={styles.addFormOptional}>(optional)</span></label>
+                            <input
+                                id="manual-weight"
+                                className={styles.addFormInput}
+                                type="number" name="weight" min="0" step="any"
+                                value={form.weight} onChange={handleFormChange}
+                                placeholder="e.g. 500"
+                            />
+                        </div>
+                        <div className={styles.addFormGroup}>
+                            <label className={styles.addFormLabel}>Unit</label>
+                            <select
+                                id="manual-unit"
+                                className={styles.addFormSelect}
+                                name="unit" value={form.unit} onChange={handleFormChange}
+                            >
+                                {UNIT_OPTIONS.map(u => <option key={u} value={u}>{u}</option>)}
+                            </select>
+                        </div>
+                        <div className={`${styles.addFormGroup} ${styles.addFormGroupName}`}>
+                            <label className={styles.addFormLabel}>Ingredient Name</label>
+                            <input
+                                id="manual-name"
+                                className={styles.addFormInput}
+                                type="text" name="name"
+                                value={form.name} onChange={handleFormChange}
+                                placeholder="e.g. Chicken Breast"
+                            />
+                        </div>
+                        <button id="manual-add-btn" type="submit" className={`btn btn-primary ${styles.addFormBtn}`}>Add</button>
+                    </div>
+                    {formError && <p className={styles.addFormError}>{formError}</p>}
+                    <p className={styles.addFormHint}>
+                        💡 Set <strong>Qty</strong> + <strong>Weight/pc</strong> to auto-multiply (e.g. 2 pieces × 500g = 1000g). Leave Weight empty to just use Qty.
+                    </p>
+                </form>
+
                 {/* Toggles */}
                 <div className={styles.toggleRow}>
                     <label className={styles.toggle}>
@@ -159,7 +261,7 @@ export default function GroceryList() {
                                 </div>
                                 <ul className={styles.itemList}>
                                     {catItems.map((item) => (
-                                        <GroceryItem key={item.id} item={item} checked={!!checked[item.id]} onToggle={toggleCheck} onAdjust={handleAdjust} system={system} />
+                                        <GroceryItem key={item.id} item={item} checked={!!checked[item.id]} onToggle={toggleCheck} onAdjust={handleAdjust} onDelete={item.isManual ? handleDeleteManual : null} system={system} />
                                     ))}
                                 </ul>
                             </div>
@@ -168,7 +270,7 @@ export default function GroceryList() {
                 ) : (
                     <ul className={styles.itemList}>
                         {finalList.map((item) => (
-                            <GroceryItem key={item.id} item={item} checked={!!checked[item.id]} onToggle={toggleCheck} onAdjust={handleAdjust} system={system} />
+                            <GroceryItem key={item.id} item={item} checked={!!checked[item.id]} onToggle={toggleCheck} onAdjust={handleAdjust} onDelete={item.isManual ? handleDeleteManual : null} system={system} />
                         ))}
                     </ul>
                 )}
@@ -210,17 +312,27 @@ export default function GroceryList() {
     );
 }
 
-function GroceryItem({ item, checked, onToggle, onAdjust, system }) {
+function GroceryItem({ item, checked, onToggle, onAdjust, onDelete, system }) {
     return (
-        <li className={`${styles.item} ${checked ? styles.itemChecked : ''}`}>
+        <li className={`${styles.item} ${checked ? styles.itemChecked : ''} ${item.isManual ? styles.itemManual : ''}`}>
             <span className={`${styles.checkbox} ${checked ? styles.checkboxDone : ''}`} onClick={() => onToggle(item.id)}>
                 {checked ? '✓' : ''}
             </span>
-            <span className={styles.itemName} onClick={() => onToggle(item.id)}>{item.name}</span>
+            <span className={styles.itemName} onClick={() => onToggle(item.id)}>
+                {item.name}
+                {item.isManual && <span className={styles.manualBadge}>manual</span>}
+            </span>
             <div className={styles.itemControls}>
-                <button className={styles.qtyBtn} onClick={() => onAdjust(item.id, -1)}>−</button>
+                {!item.isManual && (
+                    <button className={styles.qtyBtn} onClick={() => onAdjust(item.id, -1)}>−</button>
+                )}
                 <span className={styles.qtyLabel}>{displayMeasurement(item.qty, item.unit, system, true)}</span>
-                <button className={styles.qtyBtn} onClick={() => onAdjust(item.id, 1)}>+</button>
+                {!item.isManual && (
+                    <button className={styles.qtyBtn} onClick={() => onAdjust(item.id, 1)}>+</button>
+                )}
+                {onDelete && (
+                    <button className={styles.deleteBtn} onClick={() => onDelete(item.id)} title="Remove item">✕</button>
+                )}
             </div>
         </li>
     );
