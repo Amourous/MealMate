@@ -82,7 +82,7 @@ export default function PantryManager() {
                     const cleanName = (ing.name || '').trim();
                     if (!cleanName) return;
                     // Exclude names that CONTAIN a number or fraction (e.g. "Garlic 1/2 cloves")
-                    if (/[\d\/\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
+                    if (/[\d/\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
                     // Exclude overly long descriptive text
                     if (cleanName.length > 35) return;
                     

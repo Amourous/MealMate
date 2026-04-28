@@ -71,7 +71,7 @@ export default function CreateRecipeForm() {
                         r.ingredients.forEach(ing => {
                             const cleanName = (ing.name || '').trim();
                             if (!cleanName) return;
-                            if (/[\d\/\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
+                            if (/[\d/\u00BC-\u00BE\u2150-\u215E]/.test(cleanName)) return;
                             if (cleanName.length > 35) return;
                             names.add(cleanName);
                         });

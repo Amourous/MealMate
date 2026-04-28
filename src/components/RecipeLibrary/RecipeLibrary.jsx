@@ -21,7 +21,7 @@ export const TAG_LABELS = {
 
 export function RecipeModal({ recipe, onClose, onSaveServings }) {
     const { t } = useTranslation();
-    const { showConfirm } = useDialog();
+    const { showConfirm, showAlert } = useDialog();
     const [servings, setServings] = useState(recipe.servings);
     const [isSaving, setIsSaving] = useState(false);
     const [macros, setMacros] = useState(null);

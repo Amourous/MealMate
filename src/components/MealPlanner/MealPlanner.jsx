@@ -87,7 +87,7 @@ export default function MealPlanner() {
                 setError(t('planner.error', 'Failed to load recipes.'));
                 setLoading(false);
             });
-    }, []);
+    }, [t]);
 
     const recipeMap = Object.fromEntries(recipes.map((r) => [r.id, r]));
 
