@@ -153,7 +153,14 @@ export default function CreateRecipeForm() {
             });
 
             if (!response.ok) {
-                throw new Error('Scrape failed');
+                // Read and surface the real error from the Netlify function
+                let errorMsg = `Server error (${response.status})`;
+                try {
+                    const errData = await response.json();
+                    errorMsg = errData.details || errData.error || errorMsg;
+                } catch (_) { /* ignore parse error */ }
+                console.error('[Scrape] Function returned error:', errorMsg);
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
@@ -199,10 +206,11 @@ export default function CreateRecipeForm() {
                 }
             }
         } catch (err) {
+            console.error('[Scrape] Full error:', err);
             showAlert({
                 type: 'error',
                 title: 'Import Failed',
-                message: 'We couldn\'t extract the recipe from this URL. The site might be blocking us, or the format is unsupported.'
+                message: err.message || 'We couldn\'t extract the recipe from this URL. The site might be blocking us, or the format is unsupported.'
             });
         } finally {
             setScraping(false);
