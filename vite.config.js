@@ -29,18 +29,5 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/tests/setup.js',
-    pool: 'threads',
-    maxThreads: 1,
-    minThreads: 1,
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/backend/**',
-      '**/functions/**',
-      '**/netlify/**',
-      '**/ElSayed-Omar_32105931_PSE/**',
-      '**/IEEE/**',
-    ],
   },
 });

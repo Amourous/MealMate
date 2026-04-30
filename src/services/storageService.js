@@ -13,7 +13,6 @@ const keys = {
     PANTRY: `${PREFIX}pantry`,
     SETTINGS: `${PREFIX}settings`,
     INITIALIZED: `${PREFIX}initialized`,
-    MANUAL_GROCERY: `${PREFIX}manual_grocery`,
 };
 
 /** @param {string} key @returns {any|null} */
@@ -56,9 +55,6 @@ export const storageService = {
 
     getPantry: () => read(keys.PANTRY) ?? [],
     setPantry: (items) => write(keys.PANTRY, items),
-
-    getManualGrocery: () => read(keys.MANUAL_GROCERY) ?? [],
-    setManualGrocery: (items) => write(keys.MANUAL_GROCERY, items),
 
     getSettings: () => {
         const defaults = { budget: 40, currency: '€', language: 'en', measurementSystem: 'metric' };

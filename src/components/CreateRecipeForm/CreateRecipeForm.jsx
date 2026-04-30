@@ -164,17 +164,36 @@ export default function CreateRecipeForm() {
                 if (data.ingredients && data.ingredients.length > 0) {
                     // Handle both structured objects {qty, unit, name} and legacy raw strings
                     const parsedIngs = data.ingredients.map(item => {
+                        let obj = {};
                         if (typeof item === 'object' && item !== null && 'name' in item) {
                             // Already structured by AI
-                            return {
+                            obj = {
                                 name: (item.name || '').trim(),
                                 quantity: item.qty ?? item.quantity ?? 1,
                                 unit: item.unit || ''
                             };
+                        } else {
+                            // Fallback: parse raw string
+                            obj = { name: String(item).trim(), quantity: 1, unit: '' };
                         }
-                        // Fallback: parse raw string
-                        const raw = String(item).trim();
-                        return { name: raw, quantity: 1, unit: '' };
+
+                        // If AI failed to separate and put everything in the name (common with older data)
+                        if (obj.quantity === 1 && /^[0-9\.\/]/.test(obj.name)) {
+                            const match = obj.name.match(/^([\d\.\/]+)\s*(cup|cups|tbsp|tsp|g|kg|ml|L|oz|lb|pcs|pinch|tablespoon|teaspoon)?\s*(?:of\s+)?(.*)$/i);
+                            if (match) {
+                                let q = match[1];
+                                if (q.includes('/')) {
+                                    const [num, den] = q.split('/');
+                                    q = parseFloat(num) / parseFloat(den);
+                                } else {
+                                    q = parseFloat(q);
+                                }
+                                obj.quantity = isNaN(q) ? 1 : q;
+                                obj.unit = match[2] || '';
+                                obj.name = match[3].trim();
+                            }
+                        }
+                        return obj;
                     });
                     setIngredients(parsedIngs);
                 }

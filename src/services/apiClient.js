@@ -97,9 +97,9 @@ function handleMockRequest(endpoint, options = {}) {
         return Promise.resolve({
             title: "Delicious Demo Recipe (Scraped)",
             ingredients: [
-                "1 cup of Mock Milk",
-                "2 tablespoons of Demo Sugar",
-                "1 pinch of Magic Dust"
+                { name: "Mock Milk", quantity: 1, unit: "cup" },
+                { name: "Demo Sugar", quantity: 2, unit: "tbsp" },
+                { name: "Magic Dust", quantity: 1, unit: "pinch" }
             ],
             instructions: "1. Hand-crafted because the site blocked the real scraper.\n2. Mix all ingredients.\n3. Bake for 30 minutes at 350°F."
         });

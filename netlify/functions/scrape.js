@@ -32,15 +32,23 @@ exports.handler = async (event, context) => {
         const pageMarkdown = await jinaResponse.text();
 
         // 2. Pass markdown to Cloudflare AI for structured JSON extraction
-        const prompt = `
+        const prompt = \`
         You are an expert culinary AI. Below is the full scraped text of a webpage. 
         Please extract the recipe title, a strict list of ingredients, and the step-by-step instructions.
         Format the instructions as a numbered string (e.g. "1. Do this.\\n2. Do that.").
-        Format the ingredients as an array of objects, separating the name, quantity (number), and unit (string like "cup", "tbsp", "g", or "" if none).
+        Format the ingredients as an array of objects. 
+        
+        CRITICAL INSTRUCTION FOR INGREDIENTS:
+        You MUST separate the quantity, the unit, and the ingredient name.
+        Do NOT put the quantity or unit inside the "name" field.
+        Example: "2 cups of flour" -> {"name": "flour", "quantity": 2, "unit": "cup"}
+        Example: "0.5 tsp salt" -> {"name": "salt", "quantity": 0.5, "unit": "tsp"}
+        Example: "3 apples" -> {"name": "apples", "quantity": 3, "unit": "pcs"}
+        If there is no unit, use "pcs" or "".
 
         Webpage Text:
         ---
-        ${pageMarkdown.substring(0, 6000)} 
+        \${pageMarkdown.substring(0, 6000)} 
         ---
 
         Return ONLY a strict JSON object matching this structure:
@@ -49,7 +57,7 @@ exports.handler = async (event, context) => {
             "ingredients": [{"name": "string", "quantity": number, "unit": "string"}],
             "instructions": "string"
         }
-        `;
+        \`;
 
         const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-3-8b-instruct`, {
             method: 'POST',
