@@ -21,8 +21,10 @@ exports.handler = async (event, context) => {
         }
 
         // 1. Fetch raw markdown of the webpage using Jina AI's reader
+        // 1. Fetch raw markdown of the webpage using Jina AI's reader
         const jinaResponse = await fetch('https://r.jina.ai/' + url, {
-            headers: { 'Accept': 'text/plain' }
+            headers: { 'Accept': 'text/plain' },
+            signal: AbortSignal.timeout(4000)
         });
 
         if (!jinaResponse.ok) {
@@ -48,7 +50,7 @@ exports.handler = async (event, context) => {
 
         Webpage Text:
         ---
-        \${pageMarkdown.substring(0, 6000)} 
+        \${pageMarkdown.substring(0, 3000)} 
         ---
 
         Return ONLY a strict JSON object matching this structure:
@@ -73,7 +75,8 @@ exports.handler = async (event, context) => {
                 stream: false,
                 max_tokens: 1024,
                 temperature: 0.2
-            })
+            }),
+            signal: AbortSignal.timeout(5000)
         });
 
         if (!response.ok) {
